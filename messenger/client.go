@@ -120,6 +120,7 @@ func UuidNewV4() uuid.UUID {
 
 func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
 	for {
+		m.BlazeClient = NewBlazeClient(m.UserID, m.SessionID, m.SessionKey)
 		if err := m.Loop(ctx, listener); err != nil {
 			log.Println("Blaze server error", err)
 			time.Sleep(1 * time.Second)
