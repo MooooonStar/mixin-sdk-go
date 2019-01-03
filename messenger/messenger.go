@@ -8,7 +8,7 @@ type Messenger struct {
 	*BlazeClient
 }
 
-// NewMessenger create messenger
+// NewMessengerFromUser create messenger from a mixin user
 func NewMessengerFromUser(user *mixin.User) *Messenger {
 	return &Messenger{
 		user,
@@ -16,6 +16,7 @@ func NewMessengerFromUser(user *mixin.User) *Messenger {
 	}
 }
 
+// NewMessenger create messenger
 func NewMessenger(clientID, sessionID, pinToken, sessionKey string) *Messenger {
 	user := mixin.NewUser(clientID, sessionID, pinToken, sessionKey)
 	return NewMessengerFromUser(user)

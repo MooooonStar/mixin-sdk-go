@@ -23,7 +23,7 @@ func (m Messenger) FetchProfile(ctx context.Context) (*User, error) {
 	}
 
 	var resp struct {
-		User User `json:"data,omitempty"`
+		User User `json:"data"`
 	}
 	err = json.Unmarshal(data, &resp)
 	return &resp.User, err

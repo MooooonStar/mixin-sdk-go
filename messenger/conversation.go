@@ -45,7 +45,7 @@ type Conversation struct {
 	Participants []Participant `json:"participants"`
 }
 
-// CreateConversation create conversation
+// CreateConversation create a GROUP or CONTACT conversation
 func (m Messenger) CreateConversation(ctx context.Context, category string, participants ...Participant) (*Conversation, error) {
 	conversationId := uuid.Must(uuid.NewV4()).String()
 	if category == CategoryContact && len(participants) == 1 {
@@ -73,6 +73,7 @@ func (m Messenger) CreateConversation(ctx context.Context, category string, part
 	return &resp.Data, err
 }
 
+//read the info of the conversation by id
 func (m Messenger) ReadConversation(ctx context.Context, conversationId string) (*Conversation, error) {
 	body, err := m.Request(ctx, "GET", "/conversations/"+conversationId, nil)
 	if err != nil {

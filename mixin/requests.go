@@ -52,7 +52,7 @@ func (user *User) Request(ctx context.Context, method, uri string, payload []byt
 	bt, err := utils.ReadResponse(resp)
 	if resp.StatusCode != http.StatusOK {
 		var resp struct {
-			Error *Error `json:"error"`
+			Error Error `json:"error"`
 		}
 		err = json.Unmarshal(bt, &resp)
 		if err == nil {

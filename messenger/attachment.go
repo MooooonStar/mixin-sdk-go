@@ -26,18 +26,23 @@ func (m Messenger) CreateAttachment(ctx context.Context) (*Attachment, error) {
 	return &resp.Attachment, err
 }
 
-func (m Messenger) Upload(ctx context.Context, file []byte) (string, string, error) {
+func (m Messenger) Upload(ctx context.Context, data []byte) (string, string, error) {
 	attachment, err := m.CreateAttachment(ctx)
 	if err != nil {
 		return "", "", err
 	}
 
-	headers := []string{"x-amz-acl", "public-read"}
-	req, err := utils.NewRequest(attachment.UploadUrl, "PUT", string(file), headers...)
+	req, err := utils.NewRequest(attachment.UploadUrl, "PUT", string(data))
 	if err != nil {
 		return "", "", err
 	}
+	//Must include those two headers
+	req.Header.Set("x-amz-acl", "public-read")
+	req.Header.Add("Content-Type", "application/octet-stream")
 
 	_, err = utils.DoRequest(req)
+	if err != nil {
+		return "", "", err
+	}
 	return attachment.AttachmentId, attachment.ViewUrl, nil
 }
