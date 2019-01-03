@@ -8,6 +8,10 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
+
+	"github.com/fox-one/mixin-sdk/utils"
+	"github.com/hokaccha/go-prettyjson"
 )
 
 type Button struct {
@@ -18,13 +22,13 @@ type Button struct {
 
 type Multimedia struct {
 	AttachmentID string `json:"attachment_id"`
-	MimeType     string `json:"mime_type"`
-	Width        int    `json:"width"`
-	Height       int    `json:"height"`
-	Size         int64  `json:"size"`
-	Thumbnail    string `json:"thumbnail"`
-	Duration     int    `json:"duration"`
-	Name         string `json:"name"`
+	MimeType     string `json:"mime_type,omitempty"`
+	Width        int    `json:"width,omitempty"`
+	Height       int    `json:"height,omitempty"`
+	Size         int64  `json:"size,omitempty"`
+	Thumbnail    string `json:"thumbnail,omitempty"`
+	Duration     int    `json:"duration,omitempty"`
+	Name         string `json:"name,omitempty"`
 }
 
 type AppCard struct {
@@ -86,8 +90,11 @@ func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId s
 	return b.SendPlainImage(ctx, conversationId, recipientId, image)
 }
 
+//do not work yet
 func (b *Messenger) SendPlainData(ctx context.Context, conversationId, recipientId string, raw Multimedia) error {
 	data, _ := json.Marshal(raw)
+	v, _ := prettyjson.Format(data)
+	log.Println("data", string(v))
 	params := map[string]interface{}{
 		"conversation_id": conversationId,
 		"recipient_id":    recipientId,
@@ -101,6 +108,7 @@ func (b *Messenger) SendPlainData(ctx context.Context, conversationId, recipient
 	return nil
 }
 
+//do not work yet
 func (b *Messenger) SendPlainSticker(ctx context.Context, conversationId, recipientId string, name, ablumID string) error {
 	format := map[string]interface{}{
 		"name":     name,
@@ -120,6 +128,7 @@ func (b *Messenger) SendPlainSticker(ctx context.Context, conversationId, recipi
 	return nil
 }
 
+// share a contact to recipientId
 func (b *Messenger) SendPlainContact(ctx context.Context, conversationId, recipientId, contactId string) error {
 	format := map[string]string{"user_id": contactId}
 	data, _ := json.Marshal(format)
@@ -136,6 +145,7 @@ func (b *Messenger) SendPlainContact(ctx context.Context, conversationId, recipi
 	return nil
 }
 
+// send buttons to recipientId which can jump to a website when click
 func (b *Messenger) SendAppButtons(ctx context.Context, conversationId, recipientId string, buttons ...Button) error {
 	data, _ := json.Marshal(buttons)
 	params := map[string]interface{}{
@@ -152,6 +162,7 @@ func (b *Messenger) SendAppButtons(ctx context.Context, conversationId, recipien
 	return nil
 }
 
+// share app to  recipientId
 func (b *Messenger) SendAppCard(ctx context.Context, conversationId, recipientId string, card AppCard) error {
 	data, _ := json.Marshal(card)
 	params := map[string]interface{}{
@@ -185,17 +196,21 @@ func (b *Messenger) SendPlainVideo(ctx context.Context, conversationId, recipien
 	return nil
 }
 
-//do not work yet
-func (b *Messenger) SendPlainMessages(ctx context.Context, conversationId, recipientId string, video Multimedia) error {
-	data, _ := json.Marshal(video)
-	params := map[string]interface{}{
-		"conversation_id": conversationId,
-		"recipient_id":    recipientId,
-		"message_id":      UuidNewV4().String(),
-		"category":        "PLAIN_TEXT",
-		"data":            base64.StdEncoding.EncodeToString(data),
+// send content to multi-user
+func (b *Messenger) SendPlainMessages(ctx context.Context, content string, recipientID ...string) error {
+	messages := make([]interface{}, 0)
+	for _, recipient := range recipientID {
+		message := map[string]interface{}{
+			"conversation_id": utils.UniqueConversationId(ClientID, recipient),
+			"recipient_id":    recipient,
+			"message_id":      UuidNewV4().String(),
+			"category":        "PLAIN_TEXT",
+			"data":            base64.StdEncoding.EncodeToString([]byte(content)),
+		}
+		messages = append(messages, message)
 	}
-	err := writeMessageAndWait(ctx, b.mc, createMessageAction, params)
+	params := map[string]interface{}{"messages": messages}
+	err := writeMessageAndWait(ctx, b.mc, "CREATE_PLAIN_MESSAGES", params)
 	if err != nil {
 		return BlazeServerError(ctx, err)
 	}

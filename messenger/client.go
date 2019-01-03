@@ -263,6 +263,7 @@ func writeMessageAndWait(ctx context.Context, mc *messageContext, action string,
 		return fmt.Errorf("timeout to wait %s %v", action, params)
 	case t := <-resp:
 		if t.Error != nil && t.Error.Code != 403 {
+			// may cause endless loop
 			//return writeMessageAndWait(ctx, mc, action, params)
 			return BlazeServerError(ctx, t.Error)
 		}

@@ -3,8 +3,10 @@ package messenger
 import (
 	"context"
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/fox-one/mixin-sdk/utils"
 )
@@ -19,6 +21,25 @@ func init() {
 	go m.Run(ctx, DefaultBlazeListener{})
 	userID = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
 	conversationId = utils.UniqueConversationId(ClientID, userID)
+}
+
+func TestConversation(t *testing.T) {
+	participant := Participant{UserID: userID}
+	conversation, err := m.CreateConversation(ctx, CategoryGroup, participant)
+	if err != nil {
+		panic(err)
+	}
+	sample, err := m.ReadConversation(ctx, conversation.ID)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("conversation:", conversation)
+	log.Println("sample:", sample)
+
+	if err := m.SendPlainText(ctx, conversation.ID, userID, "go go go"); err != nil {
+		panic(err)
+	}
+	time.Sleep(20 * time.Second)
 }
 
 func TestSendText(t *testing.T) {

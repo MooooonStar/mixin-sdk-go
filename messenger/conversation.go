@@ -45,7 +45,7 @@ type Conversation struct {
 	Participants []Participant `json:"participants"`
 }
 
-// CreateConversation create a GROUP or CONTACT conversation
+// create a GROUP or CONTACT conversation
 func (m Messenger) CreateConversation(ctx context.Context, category string, participants ...Participant) (*Conversation, error) {
 	conversationId := uuid.Must(uuid.NewV4()).String()
 	if category == CategoryContact && len(participants) == 1 {

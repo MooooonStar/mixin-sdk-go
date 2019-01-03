@@ -13,6 +13,8 @@ type Attachment struct {
 	ViewUrl      string `json:"view_url"`
 }
 
+//get the id, upload_url, view_url for your attachment
+//the first step to upload something to mixin network
 func (m Messenger) CreateAttachment(ctx context.Context) (*Attachment, error) {
 	data, err := m.Request(ctx, "POST", "/attachments", nil)
 	if err != nil {
@@ -36,7 +38,7 @@ func (m Messenger) Upload(ctx context.Context, data []byte) (string, string, err
 	if err != nil {
 		return "", "", err
 	}
-	//Must include those two headers
+	//must set those two headers, it's used for s3 signature
 	req.Header.Set("x-amz-acl", "public-read")
 	req.Header.Add("Content-Type", "application/octet-stream")
 
