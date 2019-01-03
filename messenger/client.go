@@ -3,10 +3,10 @@ package messenger
 import (
 	"compress/gzip"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"sync"
@@ -110,12 +110,21 @@ func NewBlazeClient(uid, sid, key string) *BlazeClient {
 
 // Add
 func BlazeServerError(ctx context.Context, err error) error {
-	return ServerError(err)
+	return err
 }
 
 // Add
 func UuidNewV4() uuid.UUID {
 	return uuid.Must(uuid.NewV4())
+}
+
+func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
+	for {
+		if err := m.Loop(ctx, listener); err != nil {
+			log.Println("Blaze server error", err)
+			time.Sleep(1 * time.Second)
+		}
+	}
 }
 
 func (b *Messenger) Loop(ctx context.Context, listener BlazeListener) error {
@@ -148,98 +157,6 @@ func (b *Messenger) Loop(ctx context.Context, listener BlazeListener) error {
 	}
 }
 
-func (b *BlazeClient) SendMessage(ctx context.Context, conversationId, recipientId, category, content, representativeId string) error {
-	params := map[string]interface{}{
-		"conversation_id":   conversationId,
-		"recipient_id":      recipientId,
-		"message_id":        UuidNewV4().String(),
-		"representative_id": representativeId,
-		"category":          category,
-		"data":              base64.StdEncoding.EncodeToString([]byte(content)),
-	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	return nil
-}
-
-func (b *BlazeClient) SendPlainText(ctx context.Context, msg MessageView, content string) error {
-	params := map[string]interface{}{
-		"conversation_id": msg.ConversationId,
-		"recipient_id":    msg.UserId,
-		"message_id":      UuidNewV4().String(),
-		"category":        "PLAIN_TEXT",
-		"data":            base64.StdEncoding.EncodeToString([]byte(content)),
-	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	return nil
-}
-
-func (b *BlazeClient) SendContact(ctx context.Context, conversationId, recipientId, contactId string) error {
-	contactMap := map[string]string{"user_id": contactId}
-	contactData, _ := json.Marshal(contactMap)
-	params := map[string]interface{}{
-		"conversation_id": conversationId,
-		"recipient_id":    recipientId,
-		"message_id":      UuidNewV4().String(),
-		"category":        "PLAIN_CONTACT",
-		"data":            base64.StdEncoding.EncodeToString(contactData),
-	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	return nil
-}
-
-func (b *BlazeClient) SendAppButton(ctx context.Context, conversationId, recipientId, label, action, color string) error {
-	btns, err := json.Marshal([]interface{}{map[string]string{
-		"label":  label,
-		"action": action,
-		"color":  color,
-	}})
-	if err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	params := map[string]interface{}{
-		"conversation_id": conversationId,
-		"recipient_id":    recipientId,
-		"message_id":      UuidNewV4().String(),
-		"category":        "APP_BUTTON_GROUP",
-		"data":            base64.StdEncoding.EncodeToString(btns),
-	}
-	err = writeMessageAndWait(ctx, b.mc, createMessageAction, params)
-	if err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	return nil
-}
-
-type Button struct {
-	Label  string `json:"label"`
-	Action string `json:"action"`
-	Color  string `json:"color"`
-}
-
-func (b *BlazeClient) SendAppButtons(ctx context.Context, conversationId, recipientId string, buttons ...Button) error {
-	btns, err := json.Marshal(buttons)
-	if err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	params := map[string]interface{}{
-		"conversation_id": conversationId,
-		"recipient_id":    recipientId,
-		"message_id":      UuidNewV4().String(),
-		"category":        "APP_BUTTON_GROUP",
-		"data":            base64.StdEncoding.EncodeToString(btns),
-	}
-	err = writeMessageAndWait(ctx, b.mc, createMessageAction, params)
-	if err != nil {
-		return BlazeServerError(ctx, err)
-	}
-	return nil
-}
 func (m Messenger) connectMixinBlaze() (*websocket.Conn, error) {
 	//func connectMixinBlaze(uid, sid, key string) (*websocket.Conn, error) {
 	//token, err := SignAuthenticationToken(uid, sid, key, "GET", "/", "")
@@ -346,7 +263,7 @@ func writeMessageAndWait(ctx context.Context, mc *messageContext, action string,
 	case t := <-resp:
 		if t.Error != nil && t.Error.Code != 403 {
 			//return writeMessageAndWait(ctx, mc, action, params)
-			return BlazeServerError(ctx, err)
+			return BlazeServerError(ctx, t.Error)
 		}
 	}
 	return nil

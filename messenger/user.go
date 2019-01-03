@@ -19,7 +19,7 @@ type User struct {
 func (m Messenger) FetchProfile(ctx context.Context) (*User, error) {
 	data, err := m.Request(ctx, "GET", "/me", nil)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -40,12 +40,12 @@ func (m Messenger) ModifyProfile(ctx context.Context, fullname, avatarBase64 str
 	}
 	payload, err := json.Marshal(paras)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	data, err := m.Request(ctx, "POST", "/me", payload)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -66,12 +66,12 @@ func (m Messenger) ModifyPreference(ctx context.Context, receiveMessageSource, a
 	}
 	payload, err := json.Marshal(paras)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	data, err := m.Request(ctx, "POST", "/me/preferences", payload)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -89,12 +89,12 @@ func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]User, e
 
 	payload, err := json.Marshal(userIDS)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	data, err := m.Request(ctx, "POST", "/users/fetch", payload)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -108,7 +108,7 @@ func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]User, e
 func (m Messenger) FetchUser(ctx context.Context, userID string) (*User, error) {
 	data, err := m.Request(ctx, "GET", "/users/"+userID, nil)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -122,7 +122,7 @@ func (m Messenger) FetchUser(ctx context.Context, userID string) (*User, error) 
 func (m Messenger) SearchUser(ctx context.Context, q string) (*User, error) {
 	data, err := m.Request(ctx, "GET", "/search/"+q, nil)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -136,7 +136,7 @@ func (m Messenger) SearchUser(ctx context.Context, q string) (*User, error) {
 func (m Messenger) FetchFriends(ctx context.Context) ([]User, error) {
 	data, err := m.Request(ctx, "GET", "/friends", nil)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {

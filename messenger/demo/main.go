@@ -32,7 +32,7 @@ func (h Handler) OnMessage(ctx context.Context, msgView messenger.MessageView, u
 	msg := fmt.Sprintf("I got your message, you said: %s", string(data))
 	log.Println(msg)
 
-	return h.SendPlainText(ctx, msgView, msg)
+	return h.SendPlainText(ctx, msgView.ConversationId, msgView.UserId, msg)
 }
 
 func (h Handler) Run(ctx context.Context) {
@@ -49,7 +49,7 @@ func (h Handler) Send(ctx context.Context, userId, content string) error {
 		ConversationId: utils.UniqueConversationId(ClientID, userId),
 		UserId:         userId,
 	}
-	return h.SendPlainText(ctx, msgView, content)
+	return h.SendPlainText(ctx, msgView.ConversationId, msgView.UserId, content)
 }
 
 func main() {
@@ -59,10 +59,10 @@ func main() {
 
 	participant := messenger.Participant{
 		UserID: "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909",
-		//Role:   messenger.RoleAdmin,
+		Role:   messenger.RoleAdmin,
 		Action: messenger.ActionAdd,
 	}
-	conversation, err := m.CreateConversation(ctx, messenger.CategoryContact, participant)
+	conversation, err := m.CreateConversation(ctx, messenger.CategoryGroup, participant)
 	if err != nil {
 		log.Fatal("create conversation", err)
 	}
@@ -76,6 +76,6 @@ func main() {
 	v, _ = prettyjson.Marshal(sample)
 	log.Println("sample:", string(v))
 
-	//h := Handler{m}
-	//h.Run(ctx)
+	h := Handler{m}
+	h.Run(ctx)
 }

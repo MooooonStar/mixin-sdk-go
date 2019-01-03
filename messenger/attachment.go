@@ -8,15 +8,15 @@ import (
 )
 
 type Attachment struct {
-	AttachmentId string `json:"attachment"`
+	AttachmentId string `json:"attachment_id"`
 	UploadUrl    string `json:"upload_url"`
 	ViewUrl      string `json:"view_url"`
 }
 
 func (m Messenger) CreateAttachment(ctx context.Context) (*Attachment, error) {
-	data, err := m.Request(ctx, "POST", "/attachment", nil)
+	data, err := m.Request(ctx, "POST", "/attachments", nil)
 	if err != nil {
-		return nil, requestError(err)
+		return nil, err
 	}
 
 	var resp struct {
@@ -32,11 +32,11 @@ func (m Messenger) Upload(ctx context.Context, file []byte) (string, string, err
 		return "", "", err
 	}
 
-	req, err := utils.NewRequest(attachment.UploadUrl, "PUT", string(file))
+	headers := []string{"x-amz-acl", "public-read"}
+	req, err := utils.NewRequest(attachment.UploadUrl, "PUT", string(file), headers...)
 	if err != nil {
 		return "", "", err
 	}
-	req.Header.Set("x-amz-acl", "public-read")
 
 	_, err = utils.DoRequest(req)
 	return attachment.AttachmentId, attachment.ViewUrl, nil
