@@ -30,10 +30,10 @@ type Participant struct {
 
 // Conversation conversation
 type Conversation struct {
-	ConversationID string `json:"conversation_id"`
-	CreatorID      string `json:"creator_id"`
-	CreatedAt      string `json:"created_at"`
-	Category       string `json:"category"`
+	ID        string `json:"conversation_id"`
+	CreatorID string `json:"creator_id"`
+	CreatedAt string `json:"created_at"`
+	Category  string `json:"category"`
 
 	Name         string `json:"name,omitempty"`
 	IconURL      string `json:"icon_url,omitempty"`
