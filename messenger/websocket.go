@@ -112,6 +112,8 @@ func NewBlazeClient(uid, sid, key string) *BlazeClient {
 func BlazeServerError(ctx context.Context, err error) error {
 	return ServerError(err)
 }
+
+// Add
 func UuidNewV4() uuid.UUID {
 	return uuid.Must(uuid.NewV4())
 }

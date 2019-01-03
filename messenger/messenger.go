@@ -15,3 +15,8 @@ func NewMessenger(user *mixin.User) *Messenger {
 		NewBlazeClient(user.UserID, user.SessionID, user.SessionKey),
 	}
 }
+
+// func NewMessenger(clientID, sessionID, pinToken, sessionKey) *Messenger {
+// 	user := mixin.NewUser(clientID, sessionID, pinToken, sessionKey)
+// 	return NewMessenger(user)
+// }

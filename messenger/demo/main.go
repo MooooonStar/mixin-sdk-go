@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"crypto/x509"
 	"encoding/base64"
-	"encoding/pem"
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/hokaccha/go-prettyjson"
 
 	"github.com/fox-one/mixin-sdk/messenger"
 	"github.com/fox-one/mixin-sdk/mixin"
@@ -53,26 +53,29 @@ func (h Handler) Send(ctx context.Context, userId, content string) error {
 }
 
 func main() {
-	user := &mixin.User{
-		UserID:    ClientID,
-		SessionID: SessionID,
-		PINToken:  PINToken,
-	}
-
-	block, _ := pem.Decode([]byte(SessionKey))
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		log.Panicln(err)
-	}
-	user.SetPrivateKey(privateKey)
-
-	m := messenger.NewMessenger(user)
-	h := Handler{m}
 	ctx := context.Background()
+	user := mixin.NewUser(ClientID, SessionID, PINToken, SessionKey)
+	m := messenger.NewMessenger(user)
 
-	go h.Run(ctx)
-	for {
-		h.Send(ctx, "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909", "hello world")
-		time.Sleep(5 * time.Second)
+	participant := messenger.Participant{
+		UserID: "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909",
+		//Role:   messenger.RoleAdmin,
+		Action: messenger.ActionAdd,
 	}
+	conversation, err := m.CreateConversation(ctx, messenger.CategoryContact, participant)
+	if err != nil {
+		log.Fatal("create conversation", err)
+	}
+	v, _ := prettyjson.Marshal(conversation)
+	log.Println("conversation:", string(v))
+
+	sample, err := m.ReadConversation(ctx, conversation.ConversationID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	v, _ = prettyjson.Marshal(sample)
+	log.Println("sample:", string(v))
+
+	//h := Handler{m}
+	//h.Run(ctx)
 }

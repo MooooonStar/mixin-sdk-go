@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"compress/gzip"
-	"errors"
 	"net"
 	"net/http"
 	"net/url"
@@ -97,9 +96,9 @@ func DoRequest(request *http.Request) (*http.Response, error) {
 	})
 
 	resp, err := httpClient.Do(request)
-	if err == nil && resp != nil && resp.StatusCode != http.StatusOK {
-		err = errors.New(resp.Status)
-	}
+	// if err == nil && resp != nil && resp.StatusCode != http.StatusOK {
+	// 	err = errors.New(resp.Status)
+	// }
 
 	return resp, err
 }

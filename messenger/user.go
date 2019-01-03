@@ -3,8 +3,6 @@ package messenger
 import (
 	"context"
 	"encoding/json"
-
-	"github.com/fox-one/mixin-sdk/mixin"
 )
 
 // User messenger user entity
@@ -25,16 +23,10 @@ func (m Messenger) FetchProfile(ctx context.Context) (*User, error) {
 	}
 
 	var resp struct {
-		User  *User        `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		User User `json:"data,omitempty"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return resp.User, nil
+	err = json.Unmarshal(data, &resp)
+	return &resp.User, err
 }
 
 // ModifyProfile update my profile
@@ -57,16 +49,10 @@ func (m Messenger) ModifyProfile(ctx context.Context, fullname, avatarBase64 str
 	}
 
 	var resp struct {
-		User  *User        `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		User User `json:"data"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return resp.User, nil
+	err = json.Unmarshal(data, &resp)
+	return &resp.User, err
 }
 
 // ModifyPreference update my preference
@@ -89,22 +75,16 @@ func (m Messenger) ModifyPreference(ctx context.Context, receiveMessageSource, a
 	}
 
 	var resp struct {
-		User  *User        `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		User User `json:"data"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return resp.User, nil
+	err = json.Unmarshal(data, &resp)
+	return &resp.User, err
 }
 
 // FetchUsers fetch users
-func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]*User, error) {
+func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]User, error) {
 	if len(userIDS) == 0 {
-		return []*User{}, nil
+		return nil, nil
 	}
 
 	payload, err := json.Marshal(userIDS)
@@ -118,15 +98,9 @@ func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]*User, 
 	}
 
 	var resp struct {
-		Users []*User      `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		Users []User `json:"data"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
+	err = json.Unmarshal(data, &resp)
 	return resp.Users, nil
 }
 
@@ -138,16 +112,10 @@ func (m Messenger) FetchUser(ctx context.Context, userID string) (*User, error) 
 	}
 
 	var resp struct {
-		User  *User        `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		User User `json:"data"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return resp.User, nil
+	err = json.Unmarshal(data, &resp)
+	return &resp.User, err
 }
 
 // SearchUser search user; q is String: Mixin Id or Phone Numbe
@@ -158,34 +126,22 @@ func (m Messenger) SearchUser(ctx context.Context, q string) (*User, error) {
 	}
 
 	var resp struct {
-		User  *User        `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		User User `json:"data"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return resp.User, nil
+	err = json.Unmarshal(data, &resp)
+	return &resp.User, err
 }
 
 // FetchFriends fetch friends
-func (m Messenger) FetchFriends(ctx context.Context) ([]*User, error) {
+func (m Messenger) FetchFriends(ctx context.Context) ([]User, error) {
 	data, err := m.Request(ctx, "GET", "/friends", nil)
 	if err != nil {
 		return nil, requestError(err)
 	}
 
 	var resp struct {
-		Users []*User      `json:"data,omitempty"`
-		Error *mixin.Error `json:"error,omitempty"`
+		Users []User `json:"data"`
 	}
-	if err = json.Unmarshal(data, &resp); err != nil {
-		return nil, requestError(err)
-	} else if resp.Error != nil {
-		return nil, resp.Error
-	}
-
-	return resp.Users, nil
+	err = json.Unmarshal(data, &resp)
+	return resp.Users, err
 }
