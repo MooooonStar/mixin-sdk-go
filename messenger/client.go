@@ -22,17 +22,6 @@ const (
 	writeWait       = 10 * time.Second
 	pongWait        = 10 * time.Second
 	pingPeriod      = (pongWait * 9) / 10
-
-	createMessageAction = "CREATE_MESSAGE"
-)
-
-const (
-	MessageCategoryPlainText             = "PLAIN_TEXT"
-	MessageCategoryPlainImage            = "PLAIN_IMAGE"
-	MessageCategoryPlainData             = "PLAIN_DATA"
-	MessageCategoryPlainSticker          = "PLAIN_STICKER"
-	MessageCategorySystemConversation    = "SYSTEM_CONVERSATION"
-	MessageCategorySystemAccountSnapshot = "SYSTEM_ACCOUNT_SNAPSHOT"
 )
 
 type BlazeMessage struct {
@@ -74,13 +63,6 @@ type messageContext struct {
 	writeBuffer  chan []byte
 }
 
-type systemConversationPayload struct {
-	Action        string `json:"action"`
-	ParticipantId string `json:"participant_id"`
-	UserId        string `json:"user_id,omitempty"`
-	Role          string `json:"role,omitempty"`
-}
-
 type BlazeClient struct {
 	mc  *messageContext
 	uid string
@@ -93,19 +75,7 @@ type BlazeListener interface {
 }
 
 func NewBlazeClient(uid, sid, key string) *BlazeClient {
-	client := BlazeClient{
-		mc: &messageContext{
-			transactions: newTmap(),
-			readDone:     make(chan bool, 1),
-			writeDone:    make(chan bool, 1),
-			readBuffer:   make(chan MessageView, 102400),
-			writeBuffer:  make(chan []byte, 102400),
-		},
-		uid: uid,
-		sid: sid,
-		key: key,
-	}
-	return &client
+	return &BlazeClient{uid: uid, sid: sid, key: key}
 }
 
 // Add
@@ -123,7 +93,6 @@ func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
 		if err := m.Loop(ctx, listener); err != nil {
 			log.Println("Blaze server error", err)
 			time.Sleep(1 * time.Second)
-			m.BlazeClient = NewBlazeClient(m.UserID, m.SessionID, m.SessionKey)
 		}
 	}
 }
@@ -136,6 +105,13 @@ func (b *Messenger) Loop(ctx context.Context, listener BlazeListener) error {
 		return err
 	}
 	defer conn.Close()
+	b.mc = &messageContext{
+		transactions: newTmap(),
+		readDone:     make(chan bool, 1),
+		writeDone:    make(chan bool, 1),
+		readBuffer:   make(chan MessageView, 102400),
+		writeBuffer:  make(chan []byte, 102400),
+	}
 	go writePump(ctx, conn, b.mc)
 	go readPump(ctx, conn, b.mc)
 	if err = writeMessageAndWait(ctx, b.mc, "LIST_PENDING_MESSAGES", nil); err != nil {
@@ -244,7 +220,7 @@ func writeMessageAndWait(ctx context.Context, mc *messageContext, action string,
 	mc.transactions.set(id, func(t BlazeMessage) error {
 		select {
 		case resp <- t:
-		case <-time.After(1 * time.Second):
+		case <-time.After(2 * time.Second):
 			return fmt.Errorf("timeout to hook %s %s", action, id)
 		}
 		return nil

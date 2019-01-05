@@ -47,7 +47,7 @@ func (b *Messenger) SendPlainText(ctx context.Context, conversationId, recipient
 		"category":        "PLAIN_TEXT",
 		"data":            base64.StdEncoding.EncodeToString([]byte(content)),
 	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
+	if err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params); err != nil {
 		return BlazeServerError(ctx, err)
 	}
 	return nil
@@ -63,7 +63,7 @@ func (b *Messenger) SendPlainImage(ctx context.Context, conversationId, recipien
 		"category":        "PLAIN_IMAGE",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
+	if err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params); err != nil {
 		return BlazeServerError(ctx, err)
 	}
 	return nil
@@ -102,7 +102,7 @@ func (b *Messenger) SendPlainData(ctx context.Context, conversationId, recipient
 		"category":        "PLAIN_DATA",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
+	if err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params); err != nil {
 		return BlazeServerError(ctx, err)
 	}
 	return nil
@@ -122,7 +122,7 @@ func (b *Messenger) SendPlainSticker(ctx context.Context, conversationId, recipi
 		"category":        "PLAIN_STICKER",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
+	if err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params); err != nil {
 		return BlazeServerError(ctx, err)
 	}
 	return nil
@@ -139,7 +139,7 @@ func (b *Messenger) SendPlainContact(ctx context.Context, conversationId, recipi
 		"category":        "PLAIN_CONTACT",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	if err := writeMessageAndWait(ctx, b.mc, createMessageAction, params); err != nil {
+	if err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params); err != nil {
 		return BlazeServerError(ctx, err)
 	}
 	return nil
@@ -155,7 +155,7 @@ func (b *Messenger) SendAppButtons(ctx context.Context, conversationId, recipien
 		"category":        "APP_BUTTON_GROUP",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	err := writeMessageAndWait(ctx, b.mc, createMessageAction, params)
+	err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params)
 	if err != nil {
 		return BlazeServerError(ctx, err)
 	}
@@ -172,7 +172,7 @@ func (b *Messenger) SendAppCard(ctx context.Context, conversationId, recipientId
 		"category":        "APP_CARD",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	err := writeMessageAndWait(ctx, b.mc, createMessageAction, params)
+	err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params)
 	if err != nil {
 		return BlazeServerError(ctx, err)
 	}
@@ -189,7 +189,7 @@ func (b *Messenger) SendPlainVideo(ctx context.Context, conversationId, recipien
 		"category":        "PLAIN_VIDEO",
 		"data":            base64.StdEncoding.EncodeToString(data),
 	}
-	err := writeMessageAndWait(ctx, b.mc, createMessageAction, params)
+	err := writeMessageAndWait(ctx, b.mc, "CREATE_MESSAGE", params)
 	if err != nil {
 		return BlazeServerError(ctx, err)
 	}
