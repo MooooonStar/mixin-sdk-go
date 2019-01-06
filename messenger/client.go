@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"sync"
@@ -204,7 +203,6 @@ func writeMessageAndWait(ctx context.Context, mc *messageContext, action string,
 		return nil
 	})
 	blazeMessage, err := json.Marshal(BlazeMessage{Id: id, Action: action, Params: params})
-	log.Println("message", string(blazeMessage))
 	if err != nil {
 		return err
 	}

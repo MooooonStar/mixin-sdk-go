@@ -6,11 +6,10 @@ import (
 	"log"
 	"os"
 	"testing"
-	"time"
 )
 
 var m *Messenger
-var conversationId, snow string
+var conversationId, snow, soon string
 var ctx context.Context
 
 func init() {
@@ -18,26 +17,8 @@ func init() {
 	ctx = context.Background()
 	go m.Run(ctx, DefaultBlazeListener{})
 	snow = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
+	soon = "cd345a58-2c40-4519-9533-d50a1e1b8238"
 	conversationId = UniqueConversationId(m.UserId, snow)
-}
-
-func TestConversation(t *testing.T) {
-	participant := Participant{UserID: snow}
-	conversation, err := m.CreateConversation(ctx, CategoryGroup, participant)
-	if err != nil {
-		panic(err)
-	}
-	sample, err := m.ReadConversation(ctx, conversation.ID)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("conversation:", conversation)
-	log.Println("sample:", sample)
-
-	if err := m.SendPlainText(ctx, conversation.ID, snow, "go go go"); err != nil {
-		panic(err)
-	}
-	time.Sleep(20 * time.Second)
 }
 
 func TestSendText(t *testing.T) {
@@ -135,7 +116,6 @@ func TestSendPlainData(t *testing.T) {
 }
 
 func TestSendGroupMessage(t *testing.T) {
-	soon := "cd345a58-2c40-4519-9533-d50a1e1b8238"
 	err := m.SendGroupMessage(ctx, "hello world", snow, soon)
 	if err != nil {
 		panic(err)

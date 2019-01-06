@@ -23,11 +23,12 @@ const (
 
 // Participant conversation participant
 type Participant struct {
-	Type      string `json:"type"`
-	UserID    string `json:"user_id"`
-	Role      string `json:"role"`
-	CreatedAt string `json:"created_at"`
-	Action    string `json:"action,omitempty"`
+	Type          string `json:"type"`
+	UserID        string `json:"user_id"`
+	ParticipantID string `json:"participant_id"`
+	Role          string `json:"role"`
+	CreatedAt     string `json:"created_at"`
+	Action        string `json:"action,omitempty"`
 }
 
 // Conversation conversation
@@ -95,29 +96,6 @@ func (m Messenger) ReadConversation(ctx context.Context, conversationId string) 
 	if err != nil {
 		return nil, err
 	}
-	var resp struct {
-		Data Conversation `json:"data"`
-	}
-	err = json.Unmarshal(body, &resp)
-	return &resp.Data, err
-}
-
-// do not work yet
-func (m Messenger) ModifyConversation(ctx context.Context, conversationId string, participants ...Participant) (*Conversation, error) {
-	params, err := json.Marshal(map[string]interface{}{
-		"category":        CategoryGroup,
-		"conversation_id": conversationId,
-		"participants":    participants,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := m.Request("POST", "/conversations", params)
-	if err != nil {
-		return nil, err
-	}
-
 	var resp struct {
 		Data Conversation `json:"data"`
 	}
