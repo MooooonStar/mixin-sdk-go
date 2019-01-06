@@ -80,13 +80,19 @@ func TestSendPlainImage(t *testing.T) {
 }
 
 func TestSendVideo(t *testing.T) {
-	if err := m.SendVideo(ctx, conversationId, snow, "123.mp4"); err != nil {
+	if err := m.SendVideo(ctx, conversationId, snow, "sample.mp4"); err != nil {
 		panic(err)
 	}
 }
 
 func TestSendImage(t *testing.T) {
 	if err := m.SendImage(ctx, conversationId, snow, "donate.png"); err != nil {
+		panic(err)
+	}
+}
+
+func TestSendFile(t *testing.T) {
+	if err := m.SendFile(ctx, conversationId, snow, "demo.pdf", "application/pdf"); err != nil {
 		panic(err)
 	}
 }

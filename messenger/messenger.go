@@ -17,9 +17,9 @@ type Messenger struct {
 }
 
 // NewMessenger create messenger
-func NewMessenger(userID, sessionID, pinToken, privateKey string) *Messenger {
-	user := mixin.NewUser(userID, sessionID, pinToken, privateKey)
-	client := NewBlazeClient(userID, sessionID, privateKey)
+func NewMessenger(userId, sessionId, pinToken, privateKey string) *Messenger {
+	user := mixin.NewUser(userId, sessionId, pinToken, privateKey)
+	client := NewBlazeClient(userId, sessionId, privateKey)
 	return &Messenger{user, client}
 }
 

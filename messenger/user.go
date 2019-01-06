@@ -7,7 +7,7 @@ import (
 
 // User messenger user entity
 type User struct {
-	UserID         string `json:"user_id"`
+	UserId         string `json:"user_id"`
 	IdentityNumber string `json:"identity_number"`
 	FullName       string `json:"full_name,omitempty"`
 	AvatarURL      string `json:"avatar_url,omitempty"`

@@ -293,3 +293,25 @@ func (b *Messenger) SendVideo(ctx context.Context, conversationId, recipientId s
 	}
 	return b.SendPlainVideo(ctx, conversationId, recipientId, video)
 }
+
+func (m *Messenger) SendFile(ctx context.Context, conversationId, recipientId string, filename string, mimeType string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	bt, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	id, _, err := m.Upload(context.Background(), bt)
+	if err != nil {
+		return err
+	}
+	raw := Multimedia{
+		Name:         filename,
+		AttachmentID: id,
+		Size:         int64(len(bt)),
+		MimeType:     mimeType,
+	}
+	return m.SendPlainData(ctx, conversationId, recipientId, raw)
+}
