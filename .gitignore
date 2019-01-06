@@ -14,3 +14,4 @@
 config.*.go
 mixin/demo/demo
 messenger/demo/demo
+messenger/*.mp4

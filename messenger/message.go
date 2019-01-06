@@ -5,10 +5,17 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"io/ioutil"
+	"log"
+	"math"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
 
 	"github.com/fox-one/mixin-sdk/utils"
 	"github.com/hokaccha/go-prettyjson"
@@ -27,7 +34,7 @@ type Multimedia struct {
 	Height       int    `json:"height,omitempty"`
 	Size         int64  `json:"size,omitempty"`
 	Thumbnail    string `json:"thumbnail,omitempty"`
-	Duration     int    `json:"duration,omitempty"`
+	Duration     int64  `json:"duration,omitempty"`
 	Name         string `json:"name,omitempty"`
 }
 
@@ -70,13 +77,21 @@ func (b *Messenger) SendPlainImage(ctx context.Context, conversationId, recipien
 }
 
 // send image in one step, upload to s3 first then to user.
-func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId string, data []byte) error {
-	conf, format, err := image.DecodeConfig(bytes.NewReader(data))
+func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId string, filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	bt, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	conf, format, err := image.DecodeConfig(bytes.NewReader(bt))
 	if err != nil {
 		return err
 	}
 
-	id, _, err := b.Upload(ctx, data)
+	id, _, err := b.Upload(ctx, bt)
 	if err != nil {
 		return err
 	}
@@ -108,12 +123,9 @@ func (b *Messenger) SendPlainData(ctx context.Context, conversationId, recipient
 	return nil
 }
 
-//do not work yet
-func (b *Messenger) SendPlainSticker(ctx context.Context, conversationId, recipientId string, name, ablumID string) error {
-	format := map[string]interface{}{
-		"name":     name,
-		"album_id": ablumID,
-	}
+//send sticker to recipientId, a valid sticker_id: b14bc6e3-b1ac-45fd-a5e2-60340c9880ef
+func (b *Messenger) SendPlainSticker(ctx context.Context, conversationId, recipientId string, stickerID string) error {
+	format := map[string]interface{}{"sticker_id": stickerID}
 	data, _ := json.Marshal(format)
 	params := map[string]interface{}{
 		"conversation_id": conversationId,
@@ -179,7 +191,6 @@ func (b *Messenger) SendAppCard(ctx context.Context, conversationId, recipientId
 	return nil
 }
 
-//do not work yet
 func (b *Messenger) SendPlainVideo(ctx context.Context, conversationId, recipientId string, video Multimedia) error {
 	data, _ := json.Marshal(video)
 	params := map[string]interface{}{
@@ -194,6 +205,65 @@ func (b *Messenger) SendPlainVideo(ctx context.Context, conversationId, recipien
 		return BlazeServerError(ctx, err)
 	}
 	return nil
+}
+
+// send video file to recipientId. I do not find grace package to get video info, so  I use command ffprobe
+func (b *Messenger) SendVideo(ctx context.Context, conversationId, recipientId string, filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	bt, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	id, _, err := b.Upload(ctx, bt)
+	if err != nil {
+		return err
+	}
+
+	cmd := exec.Command("ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", filename)
+	info, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	var Resp struct {
+		Streams []struct {
+			Width  int `json:"width"`
+			Height int `json:"height"`
+		} `json:"streams"`
+		Format struct {
+			Size     string `json:"size"`
+			Duration string `json:"duration"`
+		} `json:"format"`
+	}
+
+	err = json.Unmarshal(info, &Resp)
+	if err != nil {
+		return err
+	}
+
+	var width, height int
+	for _, stream := range Resp.Streams {
+		if stream.Height > 0 && stream.Width > 0 {
+			width, height = stream.Width, stream.Height
+			break
+		}
+	}
+
+	size, _ := strconv.Atoi(Resp.Format.Size)
+	duration, _ := strconv.ParseFloat(Resp.Format.Duration, 64)
+
+	pos := strings.LastIndex(filename, ".")
+	video := Multimedia{
+		AttachmentID: id,
+		MimeType:     "video/" + strings.ToLower(filename[pos:]),
+		Width:        width,
+		Height:       height,
+		Size:         int64(size),
+		Duration:     int64(math.Ceil(duration)) * 1000,
+	}
+	return b.SendPlainVideo(ctx, conversationId, recipientId, video)
 }
 
 // send content to multi-user

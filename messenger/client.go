@@ -75,7 +75,15 @@ type BlazeListener interface {
 }
 
 func NewBlazeClient(uid, sid, key string) *BlazeClient {
-	return &BlazeClient{uid: uid, sid: sid, key: key}
+	return &BlazeClient{
+		mc: &messageContext{
+			transactions: newTmap(),
+			readDone:     make(chan bool, 1),
+			writeDone:    make(chan bool, 1),
+			readBuffer:   make(chan MessageView, 102400),
+			writeBuffer:  make(chan []byte, 102400),
+		},
+		uid: uid, sid: sid, key: key}
 }
 
 // Add
@@ -94,6 +102,7 @@ func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
 			log.Println("Blaze server error", err)
 			time.Sleep(1 * time.Second)
 		}
+		m.BlazeClient = NewBlazeClient(ClientID, SessionID, SessionKey)
 	}
 }
 
@@ -105,13 +114,6 @@ func (b *Messenger) Loop(ctx context.Context, listener BlazeListener) error {
 		return err
 	}
 	defer conn.Close()
-	b.mc = &messageContext{
-		transactions: newTmap(),
-		readDone:     make(chan bool, 1),
-		writeDone:    make(chan bool, 1),
-		readBuffer:   make(chan MessageView, 102400),
-		writeBuffer:  make(chan []byte, 102400),
-	}
 	go writePump(ctx, conn, b.mc)
 	go readPump(ctx, conn, b.mc)
 	if err = writeMessageAndWait(ctx, b.mc, "LIST_PENDING_MESSAGES", nil); err != nil {
@@ -295,6 +297,8 @@ func parseMessage(ctx context.Context, mc *messageContext, wsReader io.Reader) e
 	if err = json.Unmarshal(data, &msg); err != nil {
 		return err
 	}
+
+	log.Println("I parsed a message", msg)
 
 	select {
 	case <-time.After(keepAlivePeriod):
