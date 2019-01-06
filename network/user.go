@@ -9,6 +9,10 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+func NewUser(clientId, sessionId, pinToken, privateKey string) *User {
+	return &User{ClientId: ClientId, SessionId: SessionId, PinToken: pinToken, PrivateKey: privateKey}
+}
+
 func (u User) CreatePIN(old_pin, new_pin string) ([]byte, error) {
 	method := "POST"
 	uri := "/pin/update"

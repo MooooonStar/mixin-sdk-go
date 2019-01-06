@@ -23,7 +23,7 @@ func init() {
 //get the id, upload_url, view_url for your attachment
 //the first step to upload something to mixin network or send multimedia (image, video  etc) to others
 func (m Messenger) CreateAttachment(ctx context.Context) (*Attachment, error) {
-	data, err := m.Request(ctx, "POST", "/attachments", nil)
+	data, err := m.Request("POST", "/attachments", nil)
 	if err != nil {
 		return nil, err
 	}

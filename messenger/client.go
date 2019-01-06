@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fox-one/mixin-sdk/mixin"
+	mixin "github.com/MooooonStar/mixin-sdk/network"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
 )
@@ -86,30 +86,8 @@ func NewBlazeClient(uid, sid, key string) *BlazeClient {
 		uid: uid, sid: sid, key: key}
 }
 
-// Add
-func BlazeServerError(ctx context.Context, err error) error {
-	return err
-}
-
-// Add
-func UuidNewV4() uuid.UUID {
-	return uuid.Must(uuid.NewV4())
-}
-
-func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
-	for {
-		if err := m.Loop(ctx, listener); err != nil {
-			log.Println("Blaze server error", err)
-			time.Sleep(1 * time.Second)
-		}
-		m.BlazeClient = NewBlazeClient(ClientID, SessionID, SessionKey)
-	}
-}
-
-func (b *Messenger) Loop(ctx context.Context, listener BlazeListener) error {
-	//func (b *BlazeClient) Loop(ctx context.Context, listener BlazeListener) error {
-	//conn, err := connectMixinBlaze(b.uid, b.sid, b.key)
-	conn, err := b.connectMixinBlaze()
+func (b *BlazeClient) Loop(ctx context.Context, listener BlazeListener) error {
+	conn, err := connectMixinBlaze(b.uid, b.sid, b.key)
 	if err != nil {
 		return err
 	}
@@ -136,10 +114,8 @@ func (b *Messenger) Loop(ctx context.Context, listener BlazeListener) error {
 	}
 }
 
-func (m Messenger) connectMixinBlaze() (*websocket.Conn, error) {
-	//func connectMixinBlaze(uid, sid, key string) (*websocket.Conn, error) {
-	//token, err := SignAuthenticationToken(uid, sid, key, "GET", "/", "")
-	token, err := m.SignToken("GET", "/", nil)
+func connectMixinBlaze(uid, sid, key string) (*websocket.Conn, error) {
+	token, err := mixin.SignAuthenticationToken(uid, sid, key, "GET", "/", "")
 	if err != nil {
 		return nil, err
 	}
@@ -332,4 +308,14 @@ func (m *tmap) set(key string, t mixinTransaction) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	m.m[key] = t
+}
+
+// Add
+func BlazeServerError(ctx context.Context, err error) error {
+	return err
+}
+
+// Add
+func UuidNewV4() uuid.UUID {
+	return uuid.Must(uuid.NewV4())
 }

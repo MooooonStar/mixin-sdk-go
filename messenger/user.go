@@ -17,7 +17,7 @@ type User struct {
 
 // FetchProfile fetch my profile
 func (m Messenger) FetchProfile(ctx context.Context) (*User, error) {
-	data, err := m.Request(ctx, "GET", "/me", nil)
+	data, err := m.Request("GET", "/me", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (m Messenger) ModifyProfile(ctx context.Context, fullname, avatarBase64 str
 		return nil, err
 	}
 
-	data, err := m.Request(ctx, "POST", "/me", payload)
+	data, err := m.Request("POST", "/me", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (m Messenger) ModifyPreference(ctx context.Context, receiveMessageSource, a
 		return nil, err
 	}
 
-	data, err := m.Request(ctx, "POST", "/me/preferences", payload)
+	data, err := m.Request("POST", "/me/preferences", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]User, e
 		return nil, err
 	}
 
-	data, err := m.Request(ctx, "POST", "/users/fetch", payload)
+	data, err := m.Request("POST", "/users/fetch", payload)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]User, e
 
 // FetchUser fetch user
 func (m Messenger) FetchUser(ctx context.Context, userID string) (*User, error) {
-	data, err := m.Request(ctx, "GET", "/users/"+userID, nil)
+	data, err := m.Request("GET", "/users/"+userID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (m Messenger) FetchUser(ctx context.Context, userID string) (*User, error) 
 
 // SearchUser search user; q is String: Mixin Id or Phone Numbe
 func (m Messenger) SearchUser(ctx context.Context, q string) (*User, error) {
-	data, err := m.Request(ctx, "GET", "/search/"+q, nil)
+	data, err := m.Request("GET", "/search/"+q, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (m Messenger) SearchUser(ctx context.Context, q string) (*User, error) {
 
 // FetchFriends fetch friends
 func (m Messenger) FetchFriends(ctx context.Context) ([]User, error) {
-	data, err := m.Request(ctx, "GET", "/friends", nil)
+	data, err := m.Request("GET", "/friends", nil)
 	if err != nil {
 		return nil, err
 	}

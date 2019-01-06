@@ -65,7 +65,7 @@ func UniqueConversationId(userId, recipientId string) string {
 func (m Messenger) CreateConversation(ctx context.Context, category string, participants ...Participant) (*Conversation, error) {
 	conversationId := uuid.Must(uuid.NewV4()).String()
 	if category == CategoryContact && len(participants) == 1 {
-		conversationId = UniqueConversationId(m.User.UserID, participants[0].UserID)
+		conversationId = UniqueConversationId(m.ClientId, participants[0].UserID)
 	}
 
 	params, err := json.Marshal(map[string]interface{}{
@@ -77,7 +77,7 @@ func (m Messenger) CreateConversation(ctx context.Context, category string, part
 		return nil, err
 	}
 
-	body, err := m.Request(ctx, "POST", "/conversations", params)
+	body, err := m.Request("POST", "/conversations", params)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (m Messenger) CreateConversation(ctx context.Context, category string, part
 
 //read the info of the conversation by id
 func (m Messenger) ReadConversation(ctx context.Context, conversationId string) (*Conversation, error) {
-	body, err := m.Request(ctx, "GET", "/conversations/"+conversationId, nil)
+	body, err := m.Request("GET", "/conversations/"+conversationId, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (m Messenger) ModifyConversation(ctx context.Context, conversationId string
 		return nil, err
 	}
 
-	body, err := m.Request(ctx, "POST", "/conversations", params)
+	body, err := m.Request("POST", "/conversations", params)
 	if err != nil {
 		return nil, err
 	}

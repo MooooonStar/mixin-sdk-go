@@ -5,16 +5,15 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
 	"math"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
-
-	"image"
-	_ "image/jpeg"
-	_ "image/png"
 )
 
 type Button struct {
