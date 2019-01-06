@@ -1,16 +1,23 @@
 package messenger
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-
-	"github.com/fox-one/mixin-sdk/utils"
+	"net/http"
+	"time"
 )
 
 type Attachment struct {
 	AttachmentId string `json:"attachment_id"`
 	UploadUrl    string `json:"upload_url"`
 	ViewUrl      string `json:"view_url"`
+}
+
+var httpClient *http.Client
+
+func init() {
+	httpClient = &http.Client{Timeout: 10 * time.Second}
 }
 
 //get the id, upload_url, view_url for your attachment
@@ -34,7 +41,7 @@ func (m Messenger) Upload(ctx context.Context, data []byte) (string, string, err
 		return "", "", err
 	}
 
-	req, err := utils.NewRequest(attachment.UploadUrl, "PUT", string(data))
+	req, err := http.NewRequest(attachment.UploadUrl, "PUT", bytes.NewReader(data))
 	if err != nil {
 		return "", "", err
 	}
@@ -42,7 +49,7 @@ func (m Messenger) Upload(ctx context.Context, data []byte) (string, string, err
 	req.Header.Set("x-amz-acl", "public-read")
 	req.Header.Add("Content-Type", "application/octet-stream")
 
-	_, err = utils.DoRequest(req)
+	_, err = httpClient.Do(req)
 	if err != nil {
 		return "", "", err
 	}

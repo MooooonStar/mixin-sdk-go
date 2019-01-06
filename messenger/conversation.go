@@ -2,9 +2,11 @@ package messenger
 
 import (
 	"context"
+	"crypto/md5"
 	"encoding/json"
+	"io"
+	"strings"
 
-	"github.com/fox-one/mixin-sdk/utils"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -45,11 +47,25 @@ type Conversation struct {
 	Participants []Participant `json:"participants"`
 }
 
+func UniqueConversationId(userId, recipientId string) string {
+	minId, maxId := userId, recipientId
+	if strings.Compare(userId, recipientId) > 0 {
+		maxId, minId = userId, recipientId
+	}
+	h := md5.New()
+	io.WriteString(h, minId)
+	io.WriteString(h, maxId)
+	sum := h.Sum(nil)
+	sum[6] = (sum[6] & 0x0f) | 0x30
+	sum[8] = (sum[8] & 0x3f) | 0x80
+	return uuid.FromBytesOrNil(sum).String()
+}
+
 // create a GROUP or CONTACT conversation
 func (m Messenger) CreateConversation(ctx context.Context, category string, participants ...Participant) (*Conversation, error) {
 	conversationId := uuid.Must(uuid.NewV4()).String()
 	if category == CategoryContact && len(participants) == 1 {
-		conversationId = utils.UniqueConversationId(m.User.UserID, participants[0].UserID)
+		conversationId = UniqueConversationId(m.User.UserID, participants[0].UserID)
 	}
 
 	params, err := json.Marshal(map[string]interface{}{

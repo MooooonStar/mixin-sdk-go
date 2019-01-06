@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"math"
 	"os"
 	"os/exec"
@@ -16,9 +15,6 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-
-	"github.com/fox-one/mixin-sdk/utils"
-	"github.com/hokaccha/go-prettyjson"
 )
 
 type Button struct {
@@ -108,8 +104,6 @@ func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId s
 //do not work yet
 func (b *Messenger) SendPlainData(ctx context.Context, conversationId, recipientId string, raw Multimedia) error {
 	data, _ := json.Marshal(raw)
-	v, _ := prettyjson.Format(data)
-	log.Println("data", string(v))
 	params := map[string]interface{}{
 		"conversation_id": conversationId,
 		"recipient_id":    recipientId,
@@ -271,7 +265,7 @@ func (b *Messenger) SendPlainMessages(ctx context.Context, content string, recip
 	messages := make([]interface{}, 0)
 	for _, recipient := range recipientID {
 		message := map[string]interface{}{
-			"conversation_id": utils.UniqueConversationId(ClientID, recipient),
+			"conversation_id": UniqueConversationId(ClientID, recipient),
 			"recipient_id":    recipient,
 			"message_id":      UuidNewV4().String(),
 			"category":        "PLAIN_TEXT",

@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	"github.com/fox-one/mixin-sdk/utils"
 )
 
 var m *Messenger
@@ -24,7 +22,7 @@ func init() {
 	ctx = context.Background()
 	go m.Run(ctx, DefaultBlazeListener{})
 	userID = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
-	conversationId = utils.UniqueConversationId(ClientID, userID)
+	conversationId = UniqueConversationId(ClientID, userID)
 }
 
 func TestConversation(t *testing.T) {
