@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"sync"
@@ -273,8 +272,6 @@ func parseMessage(ctx context.Context, mc *messageContext, wsReader io.Reader) e
 	if err = json.Unmarshal(data, &msg); err != nil {
 		return err
 	}
-
-	log.Println("I parsed a message", msg)
 
 	select {
 	case <-time.After(keepAlivePeriod):

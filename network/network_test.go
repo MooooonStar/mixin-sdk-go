@@ -18,7 +18,7 @@ var moon_id = "825d5134-c921-3cf9-a83b-848b73"
 var moon_cnb = "0x0EC770FD731C04DcDdDBca97176DC5f6af2AbeF4"
 
 func TestVerifyPin(t *testing.T) {
-	data, err := VerifyPIN("438660")
+	data, err := VerifyPIN("944855")
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -38,14 +38,14 @@ func TestCreateAddress(t *testing.T) {
 func TestReadAddresses(t *testing.T) {
 	data, err := ReadAddress("814a0195-2048-4e09-b932-48f0b39b559b")
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestReadAsset(t *testing.T) {
 	data, err := ReadAsset("CNB")
 	assert.Nil(t, err)
 	log.Println("cnb")
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestReadAssets(t *testing.T) {

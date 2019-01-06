@@ -65,7 +65,7 @@ func UniqueConversationId(userId, recipientId string) string {
 func (m Messenger) CreateConversation(ctx context.Context, category string, participants ...Participant) (*Conversation, error) {
 	conversationId := uuid.Must(uuid.NewV4()).String()
 	if category == CategoryContact && len(participants) == 1 {
-		conversationId = UniqueConversationId(m.ClientId, participants[0].UserID)
+		conversationId = UniqueConversationId(m.UserId, participants[0].UserID)
 	}
 
 	params, err := json.Marshal(map[string]interface{}{
