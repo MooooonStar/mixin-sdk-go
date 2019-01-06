@@ -1,32 +1,28 @@
 package messenger
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
-	"strconv"
 	"testing"
 	"time"
 )
 
 var m *Messenger
-var conversationId, userID string
+var conversationId, snow string
 var ctx context.Context
 
 func init() {
-	m = NewMessenger(ClientID, SessionID, PINToken, SessionKey)
+	m = NewMessenger(UserID, SessionID, PinToken, PrivateKey)
 	ctx = context.Background()
 	go m.Run(ctx, DefaultBlazeListener{})
-	userID = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
-	conversationId = UniqueConversationId(ClientID, userID)
+	snow = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
+	conversationId = UniqueConversationId(m.UserId, snow)
 }
 
 func TestConversation(t *testing.T) {
-	participant := Participant{UserID: userID}
+	participant := Participant{UserID: snow}
 	conversation, err := m.CreateConversation(ctx, CategoryGroup, participant)
 	if err != nil {
 		panic(err)
@@ -38,14 +34,14 @@ func TestConversation(t *testing.T) {
 	log.Println("conversation:", conversation)
 	log.Println("sample:", sample)
 
-	if err := m.SendPlainText(ctx, conversation.ID, userID, "go go go"); err != nil {
+	if err := m.SendPlainText(ctx, conversation.ID, snow, "go go go"); err != nil {
 		panic(err)
 	}
 	time.Sleep(20 * time.Second)
 }
 
 func TestSendText(t *testing.T) {
-	if err := m.SendPlainText(ctx, conversationId, userID, "hello!"); err != nil {
+	if err := m.SendPlainText(ctx, conversationId, snow, "hello!"); err != nil {
 		panic(err)
 	}
 }
@@ -53,42 +49,42 @@ func TestSendText(t *testing.T) {
 func TestSendAppCard(t *testing.T) {
 	card := AppCard{Title: "CNB", Description: "Chui Niu Bi", Action: "http://www.google.cn",
 		IconUrl: "https://images.mixin.one/0sQY63dDMkWTURkJVjowWY6Le4ICjAFuu3ANVyZA4uI3UdkbuOT5fjJUT82ArNYmZvVcxDXyNjxoOv0TAYbQTNKS=s128"}
-	if err := m.SendAppCard(ctx, conversationId, userID, card); err != nil {
+	if err := m.SendAppCard(ctx, conversationId, snow, card); err != nil {
 		panic(err)
 	}
 }
 func TestSendAppButton(t *testing.T) {
 	google := Button{Label: "google", Color: "#ABABAB", Action: "https://www.google.cn"}
 	baidu := Button{Label: "baidu", Color: "#BABABA", Action: "https://www.baidu.com"}
-	if err := m.SendAppButtons(ctx, conversationId, userID, google, baidu); err != nil {
+	if err := m.SendAppButtons(ctx, conversationId, snow, google, baidu); err != nil {
 		panic(err)
 	}
 }
 
 func TestSendContact(t *testing.T) {
-	if err := m.SendPlainContact(ctx, conversationId, userID, "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"); err != nil {
+	if err := m.SendPlainContact(ctx, conversationId, snow, "c7ff704e-1a74-4f12-b05c-7a2be955a782"); err != nil {
 		panic(err)
 	}
 }
 
 func TestSendSticker(t *testing.T) {
-	if err := m.SendPlainSticker(ctx, conversationId, userID, "b14bc6e3-b1ac-45fd-a5e2-60340c9880ef"); err != nil {
+	if err := m.SendPlainSticker(ctx, conversationId, snow, "b14bc6e3-b1ac-45fd-a5e2-60340c9880ef"); err != nil {
 		panic(err)
 	}
 }
 
-func TestSendImage(t *testing.T) {
+func TestSendPlainImage(t *testing.T) {
 	file, err := os.Open("donate.png")
 	if err != nil {
-		panic(err)
+		log.Fatal("open", err)
 	}
 	bt, err := ioutil.ReadAll(file)
 	if err != nil {
-		panic(err)
+		log.Fatal("read", err)
 	}
 	id, _, err := m.Upload(ctx, bt)
 	if err != nil {
-		panic(err)
+		log.Fatal("upload", err)
 	}
 
 	image := Multimedia{
@@ -97,14 +93,25 @@ func TestSendImage(t *testing.T) {
 		Width:        256,
 		Height:       256,
 	}
-	if err := m.SendPlainImage(ctx, conversationId, userID, image); err != nil {
-		panic(err)
+	if err := m.SendPlainImage(ctx, conversationId, snow, image); err != nil {
+		log.Fatal("send", err)
 	}
 }
 
 func TestSendVideo(t *testing.T) {
-	filename := "123.mp4"
-	file, err := os.Open(filename)
+	if err := m.SendVideo(ctx, conversationId, snow, "123.mp4"); err != nil {
+		panic(err)
+	}
+}
+
+func TestSendImage(t *testing.T) {
+	if err := m.SendImage(ctx, conversationId, snow, "donate.png"); err != nil {
+		panic(err)
+	}
+}
+
+func TestSendPlainData(t *testing.T) {
+	file, err := os.Open("123.mp4")
 	if err != nil {
 		panic(err)
 	}
@@ -112,64 +119,25 @@ func TestSendVideo(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	id, _, err := m.Upload(ctx, bt)
+	id, _, err := m.Upload(context.Background(), bt)
 	if err != nil {
 		panic(err)
 	}
-
-	cmd := exec.Command("ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams")
-	cmd.Stdin = bytes.NewReader(bt)
-	info, err := cmd.Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var Resp struct {
-		Streams []struct {
-			Width  int `json:"width"`
-			Height int `json:"height"`
-		} `json:"streams"`
-		Format struct {
-			Size     string `json:"size"`
-			Duration string `json:"duration"`
-		} `json:"format"`
-	}
-
-	err = json.Unmarshal(info, &Resp)
-	if err != nil {
-		panic(err)
-	}
-
-	var width, height int
-	for _, stream := range Resp.Streams {
-		if stream.Height > 0 && stream.Width > 0 {
-			width, height = stream.Width, stream.Height
-		}
-	}
-
-	size, _ := strconv.Atoi(Resp.Format.Size)
-	duration, _ := strconv.ParseFloat(Resp.Format.Duration, 64)
-
-	video := Multimedia{
+	media := Multimedia{
+		Name:         "123.mp4",
 		AttachmentID: id,
+		Size:         int64(len(bt)),
 		MimeType:     "video/mp4",
-		Width:        width,
-		Height:       height,
-		Size:         int64(size),
-		Duration:     int64(duration) * 1000,
 	}
-	if err := m.SendPlainVideo(ctx, conversationId, userID, video); err != nil {
+	if err := m.SendPlainData(ctx, conversationId, snow, media); err != nil {
 		panic(err)
 	}
 }
 
-func TestSendImageOneStep(t *testing.T) {
-	if err := m.SendImage(ctx, conversationId, userID, "donate.png"); err != nil {
-		panic(err)
-	}
-}
-
-func TestSendVideoOneStep(t *testing.T) {
-	if err := m.SendVideo(ctx, conversationId, userID, "123.mp4"); err != nil {
+func TestSendGroupMessage(t *testing.T) {
+	soon := "cd345a58-2c40-4519-9533-d50a1e1b8238"
+	err := m.SendGroupMessage(ctx, "hello world", snow, soon)
+	if err != nil {
 		panic(err)
 	}
 }

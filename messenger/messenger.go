@@ -17,9 +17,9 @@ type Messenger struct {
 }
 
 // NewMessenger create messenger
-func NewMessenger(clientID, sessionID, pinToken, privateKey string) *Messenger {
-	user := mixin.NewUser(clientID, sessionID, pinToken, privateKey)
-	client := NewBlazeClient(clientID, sessionID, privateKey)
+func NewMessenger(userID, sessionID, pinToken, privateKey string) *Messenger {
+	user := mixin.NewUser(userID, sessionID, pinToken, privateKey)
+	client := NewBlazeClient(userID, sessionID, privateKey)
 	return &Messenger{user, client}
 }
 
@@ -29,7 +29,7 @@ func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
 			log.Println("Blaze server error", err)
 			time.Sleep(1 * time.Second)
 		}
-		m.BlazeClient = NewBlazeClient(ClientID, SessionID, SessionKey)
+		m.BlazeClient = NewBlazeClient(m.UserId, m.SessionId, m.PrivateKey)
 	}
 }
 

@@ -41,7 +41,7 @@ func (m Messenger) Upload(ctx context.Context, data []byte) (string, string, err
 		return "", "", err
 	}
 
-	req, err := http.NewRequest(attachment.UploadUrl, "PUT", bytes.NewReader(data))
+	req, err := http.NewRequest("PUT", attachment.UploadUrl, bytes.NewReader(data))
 	if err != nil {
 		return "", "", err
 	}
