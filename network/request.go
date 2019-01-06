@@ -58,7 +58,7 @@ func Request(method, uri string, body []byte, clientId, sessionId, privateKey st
 
 func MixinRequest(method, uri string, params ...P) ([]byte, error) {
 	if len(params) == 0 {
-		return Request(method, uri, nil, ClientId, SessionId, PrivateKey)
+		return Request(method, uri, nil, UserId, SessionId, PrivateKey)
 	}
 
 	switch method {
@@ -68,14 +68,14 @@ func MixinRequest(method, uri string, params ...P) ([]byte, error) {
 			str = append(str, fmt.Sprintf("%v=%v", k, v))
 		}
 		query := "?" + strings.Join(str, "&")
-		return Request(method, uri+query, nil, ClientId, SessionId, PrivateKey)
+		return Request(method, uri+query, nil, UserId, SessionId, PrivateKey)
 
 	case "POST":
 		body, err := jsoniter.Marshal(params[0])
 		if err != nil {
 			return nil, err
 		}
-		return Request(method, uri, body, ClientId, SessionId, PrivateKey)
+		return Request(method, uri, body, UserId, SessionId, PrivateKey)
 	}
 	return nil, fmt.Errorf("Unsupported method.")
 }

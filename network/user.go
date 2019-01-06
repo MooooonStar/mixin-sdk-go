@@ -9,8 +9,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func NewUser(clientId, sessionId, pinToken, privateKey string) *User {
-	return &User{ClientId: ClientId, SessionId: SessionId, PinToken: pinToken, PrivateKey: privateKey}
+func NewUser(userId, sessionId, pinToken, privateKey string) *User {
+	return &User{UserId: userId, SessionId: SessionId, PinToken: pinToken, PrivateKey: privateKey}
 }
 
 func (u User) CreatePIN(old_pin, new_pin string) ([]byte, error) {
@@ -159,7 +159,7 @@ func (u User) ReadProfile() ([]byte, error) {
 }
 
 func (u User) Request(method, uri string, body []byte) ([]byte, error) {
-	return Request(method, uri, body, u.ClientId, u.SessionId, u.PrivateKey)
+	return Request(method, uri, body, u.UserId, u.SessionId, u.PrivateKey)
 }
 
 func (u User) MixinRequest(method, uri string, payload ...P) ([]byte, error) {
