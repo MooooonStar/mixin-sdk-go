@@ -9,7 +9,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	m := messenger.NewMessenger(UserId, SessionId, PINToken, SessionKey)
+	m := messenger.NewMessenger(UserId, SessionId, PinToken, PrivateKey)
 	//replace with your own listener
 	go m.Run(ctx, messenger.DefaultBlazeListener{})
 

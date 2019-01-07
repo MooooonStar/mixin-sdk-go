@@ -9,20 +9,29 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func NewUser(userId, sessionId, pinToken, privateKey string) *User {
-	return &User{UserId: userId, SessionId: SessionId, PinToken: pinToken, PrivateKey: privateKey}
+func NewUser(userId, sessionId, privateKey string, pinCodeToken ...string) *User {
+	user := User{UserId: userId, SessionId: sessionId, PrivateKey: privateKey}
+	if len(pinCodeToken) == 2 {
+		user.SetPin(pinCodeToken[0], pinCodeToken[1])
+	}
+	return &user
 }
 
-func (u User) CreatePIN(old_pin, new_pin string) ([]byte, error) {
+func (u *User) SetPin(pinCode, pinToken string) {
+	u.PinCode = pinCode
+	u.PinToken = pinToken
+}
+
+func (u User) CreatePIN(oldPin, newPin string) ([]byte, error) {
 	method := "POST"
 	uri := "/pin/update"
 
 	oldEncryptedPin := ""
-	if len(old_pin) > 0 {
-		oldEncryptedPin = EncryptPIN(old_pin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
+	if len(oldPin) > 0 {
+		oldEncryptedPin = EncryptPIN(oldPin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
 	}
 
-	newEncryptedPin := EncryptPIN(new_pin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
+	newEncryptedPin := EncryptPIN(newPin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
 
 	body := P{"old_pin": oldEncryptedPin, "pin": newEncryptedPin}
 	return u.MixinRequest(method, uri, body)
@@ -120,64 +129,62 @@ func (u User) ReadAssets() ([]byte, error) {
 	return u.MixinRequest(method, uri)
 }
 
-func (u User) VarifyPayment(opponent_id, amount, asset, trace_id string) ([]byte, error) {
+func (u User) VarifyPayment(opponentId, amount, asset, traceId string) ([]byte, error) {
 	method := "POST"
 	uri := "/payments"
 	body := P{
 		"asset_id":    asset,
-		"opponent_id": opponent_id,
+		"opponent_id": opponentId,
 		"amount":      amount,
-		"trace_id":    trace_id,
+		"trace_id":    traceId,
 	}
 	return u.MixinRequest(method, uri, body)
 }
 
-func (u User) Transfer(opponent_id, amount, asset, memo string, trace_id ...string) ([]byte, error) {
+func (u User) Transfer(opponent_id, amount, asset, memo string, traceId ...string) ([]byte, error) {
 	method := "POST"
 	uri := "/transfers"
 	pin := EncryptPIN(u.PinCode, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
 
-	trace_uuid := uuid.Must(uuid.NewV4()).String()
-	if len(trace_id) > 0 {
-		trace_uuid = trace_id[0]
+	trace := uuid.Must(uuid.NewV4()).String()
+	if len(traceId) > 0 {
+		trace = traceId[0]
 	}
 	body := P{
 		"asset_id":    asset,
 		"opponent_id": opponent_id,
 		"amount":      amount,
 		"pin":         pin,
-		"trace_id":    trace_uuid,
+		"trace_id":    trace,
 		"memo":        memo,
 	}
 	return u.MixinRequest(method, uri, body)
 }
 
 func (u User) ReadProfile() ([]byte, error) {
-	method := "GET"
-	uri := "/me"
-	return u.MixinRequest(method, uri)
+	return u.MixinRequest("GET", "/me")
 }
 
 func (u User) Request(method, uri string, body []byte) ([]byte, error) {
 	return Request(method, uri, body, u.UserId, u.SessionId, u.PrivateKey)
 }
 
-func (u User) MixinRequest(method, uri string, payload ...P) ([]byte, error) {
-	if len(payload) == 0 {
+func (u User) MixinRequest(method, uri string, params ...P) ([]byte, error) {
+	if len(params) == 0 {
 		return u.Request(method, uri, nil)
 	}
 
 	switch method {
 	case "GET":
 		str := make([]string, 0)
-		for k, v := range payload[0] {
+		for k, v := range params[0] {
 			str = append(str, fmt.Sprintf("%v=%v", k, v))
 		}
 		query := "?" + strings.Join(str, "&")
 		return u.Request(method, uri+query, nil)
 
 	case "POST":
-		bt, err := json.Marshal(payload[0])
+		bt, err := json.Marshal(params[0])
 		if err != nil {
 			return nil, err
 		}

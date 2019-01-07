@@ -13,7 +13,7 @@ var conversationId, snow, soon string
 var ctx context.Context
 
 func init() {
-	m = NewMessenger(UserID, SessionID, PinToken, PrivateKey)
+	m = NewMessenger(UserId, SessionId, PrivateKey)
 	ctx = context.Background()
 	go m.Run(ctx, DefaultBlazeListener{})
 	snow = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"

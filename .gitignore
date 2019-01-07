@@ -19,3 +19,5 @@ messenger/*.mp4
 messenger/*.pdf
 
 network/config.go
+
+network/demo

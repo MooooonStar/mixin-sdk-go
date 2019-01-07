@@ -24,8 +24,8 @@ func init() {
 	client = &http.Client{Timeout: time.Duration(30 * time.Second)}
 }
 
-func Request(method, uri string, body []byte, clientId, sessionId, privateKey string) ([]byte, error) {
-	token, err := SignAuthenticationToken(clientId, sessionId, privateKey, method, uri, string(body))
+func Request(method, uri string, body []byte, userId, sessionId, privateKey string) ([]byte, error) {
+	token, err := SignAuthenticationToken(userId, sessionId, privateKey, method, uri, string(body))
 	if err != nil {
 		return nil, err
 	}
@@ -56,26 +56,26 @@ func Request(method, uri string, body []byte, clientId, sessionId, privateKey st
 	return bt, err
 }
 
-func MixinRequest(method, uri string, params ...P) ([]byte, error) {
+func MixinRequest(method, uri string, params P, userId, sessionId, privateKey string) ([]byte, error) {
 	if len(params) == 0 {
-		return Request(method, uri, nil, UserId, SessionId, PrivateKey)
+		return Request(method, uri, nil, userId, sessionId, privateKey)
 	}
 
 	switch method {
 	case "GET":
 		str := make([]string, 0)
-		for k, v := range params[0] {
+		for k, v := range params {
 			str = append(str, fmt.Sprintf("%v=%v", k, v))
 		}
 		query := "?" + strings.Join(str, "&")
-		return Request(method, uri+query, nil, UserId, SessionId, PrivateKey)
+		return Request(method, uri+query, nil, userId, sessionId, privateKey)
 
 	case "POST":
-		body, err := jsoniter.Marshal(params[0])
+		body, err := jsoniter.Marshal(params)
 		if err != nil {
 			return nil, err
 		}
-		return Request(method, uri, body, UserId, SessionId, PrivateKey)
+		return Request(method, uri, body, userId, sessionId, privateKey)
 	}
 	return nil, fmt.Errorf("Unsupported method.")
 }
