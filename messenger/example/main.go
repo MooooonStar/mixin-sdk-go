@@ -42,6 +42,5 @@ func main() {
 		log.Println("send video error", err)
 	}
 
-	for {
-	}
+	select {}
 }
