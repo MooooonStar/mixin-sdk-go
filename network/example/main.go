@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	user := mixin.NewUser(UserId, SessionId, PrivateKey)
+	user := mixin.NewUser(UserId, SessionId, PrivateKey, PinCode, PinToken)
+	//user := mixin.NewUser(UserId, SessionId, PrivateKey)
 
 	profile, err := user.ReadProfile()
 	if err != nil {
