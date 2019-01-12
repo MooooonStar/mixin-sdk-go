@@ -11,13 +11,13 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-config.*.go
-mixin/demo/demo
-messenger/demo/demo
-
 messenger/*.mp4
 messenger/*.pdf
 
-network/config.go
+network/example/example
+messenger/example/example
 
-network/demo
+network/config.go
+network/example/config.local.go
+messenger/config.go
+messenger/example/config.local.go

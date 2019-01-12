@@ -156,15 +156,6 @@ func TestRSA(t *testing.T) {
 func TestCreateAppUser(t *testing.T) {
 	user, err := CreateAppUser("sf", "123456", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	// user := User{
-	// 	//ID:           "7000101596",
-	// 	FullName:   "snow",
-	// 	UserId:     UserId,
-	// 	PinCode:    PinCode,
-	// 	SessionId:  SessionId,
-	// 	PinToken:   PinToken,
-	// 	PrivateKey: PrivateKey,
-	// }
 
 	client := redis.NewClient(&redis.Options{
 		Addr: "127.0.0.1:6379",
