@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	mixin "github.com/MooooonStar/mixin-sdk/network"
+	mixin "github.com/MooooonStar/mixin-sdk-go/network"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
 )

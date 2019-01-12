@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/MooooonStar/mixin-sdk/messenger"
+	"github.com/MooooonStar/mixin-sdk-go/messenger"
 )
 
 func main() {
 	ctx := context.Background()
-	m := messenger.NewMessenger(UserId, SessionId, PinToken, PrivateKey)
+	m := messenger.NewMessenger(UserId, SessionId, PrivateKey)
 	//replace with your own listener
 	go m.Run(ctx, messenger.DefaultBlazeListener{})
 

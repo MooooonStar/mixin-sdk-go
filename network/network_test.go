@@ -154,7 +154,7 @@ func TestRSA(t *testing.T) {
 }
 
 func TestCreateAppUser(t *testing.T) {
-	user, err := CreateAppUser("coco", "123456", UserId, SessionId, PrivateKey)
+	user, err := CreateAppUser("sf", "123456", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	// user := User{
 	// 	//ID:           "7000101596",

@@ -23,27 +23,20 @@ func (u *User) SetPin(pinCode, pinToken string) {
 }
 
 func (u User) CreatePIN(oldPin, newPin string) ([]byte, error) {
-	method := "POST"
-	uri := "/pin/update"
-
 	oldEncryptedPin := ""
 	if len(oldPin) > 0 {
 		oldEncryptedPin = EncryptPIN(oldPin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
 	}
 
 	newEncryptedPin := EncryptPIN(newPin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
-
 	body := P{"old_pin": oldEncryptedPin, "pin": newEncryptedPin}
-	return u.MixinRequest(method, uri, body)
+	return u.MixinRequest("POST", "/pin/update", body)
 }
 
 func (u User) VerifyPIN(pin string) ([]byte, error) {
-	method := "POST"
-	uri := "/pin/verify"
 	encryptedPin := EncryptPIN(pin, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
-
 	body := P{"pin": encryptedPin}
-	return u.MixinRequest(method, uri, body)
+	return u.MixinRequest("POST", "/pin/verify", body)
 }
 
 func (u User) Deposit(asset string, acount_info ...string) ([]byte, error) {
@@ -118,15 +111,11 @@ func (u User) CreateAddress(asset, address, label string, account_info ...string
 }
 
 func (u User) ReadAsset(asset string) ([]byte, error) {
-	method := "GET"
-	uri := "/assets/" + asset
-	return u.MixinRequest(method, uri)
+	return u.MixinRequest("GET", "/assets/"+asset)
 }
 
 func (u User) ReadAssets() ([]byte, error) {
-	method := "GET"
-	uri := "/assets"
-	return u.MixinRequest(method, uri)
+	return u.MixinRequest("GET", "/assets")
 }
 
 func (u User) VarifyPayment(opponentId, amount, asset, traceId string) ([]byte, error) {
@@ -142,10 +131,7 @@ func (u User) VarifyPayment(opponentId, amount, asset, traceId string) ([]byte, 
 }
 
 func (u User) Transfer(opponent_id, amount, asset, memo string, traceId ...string) ([]byte, error) {
-	method := "POST"
-	uri := "/transfers"
 	pin := EncryptPIN(u.PinCode, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano()))
-
 	trace := uuid.Must(uuid.NewV4()).String()
 	if len(traceId) > 0 {
 		trace = traceId[0]
@@ -158,7 +144,7 @@ func (u User) Transfer(opponent_id, amount, asset, memo string, traceId ...strin
 		"trace_id":    trace,
 		"memo":        memo,
 	}
-	return u.MixinRequest(method, uri, body)
+	return u.MixinRequest("POST", "/transfers", body)
 }
 
 func (u User) ReadProfile() ([]byte, error) {

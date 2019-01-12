@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	mixin "github.com/MooooonStar/mixin-sdk/network"
+	mixin "github.com/MooooonStar/mixin-sdk-go/network"
 )
 
 // Messenger mixin messenger
