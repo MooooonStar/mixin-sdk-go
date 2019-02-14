@@ -103,11 +103,11 @@ func TestNetworkSnapshot(t *testing.T) {
 	log.Println(string(data))
 }
 
-// func TestExternalTransactions(t *testing.T) {
-// 	data, err := ExternalTransactions(CNB, moon_cnb, "", "")
-// 	assert.Nil(t, err)
-// 	log.Println(data)
-// }
+func TestExternalTransactions(t *testing.T) {
+	data, err := ExternalTransactions(CNB, "0x4fE05eBB326f52A671247d693a56771e29E1b5EA", "", time.Now().Add(-24*time.Hour), 10, UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	log.Println(string(data))
+}
 
 func TestSearchUser(t *testing.T) {
 	data, err := MixinRequest("GET", "/search/"+"37194514", nil, UserId, SessionId, PrivateKey)
