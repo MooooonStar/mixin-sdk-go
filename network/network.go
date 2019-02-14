@@ -8,22 +8,14 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"time"
-
-	uuid "github.com/satori/go.uuid"
 )
 
 func CreatePIN(old_pin, new_pin, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
 	method := "POST"
 	uri := "/pin/update"
-
 	oldEncryptedPin := EncryptPIN(old_pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
 	newEncryptedPin := EncryptPIN(new_pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-
-	body := P{
-		"old_pin": oldEncryptedPin,
-		"pin":     newEncryptedPin,
-	}
-
+	body := P{"old_pin": oldEncryptedPin, "pin": newEncryptedPin}
 	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
 }
 
@@ -31,31 +23,17 @@ func VerifyPIN(pin, pinToken, userId, sessionId, privateKey string) ([]byte, err
 	method := "POST"
 	uri := "/pin/verify"
 	encryptedPin := EncryptPIN(pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-
-	body := P{
-		"pin": encryptedPin,
-	}
-
+	body := P{"pin": encryptedPin}
 	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
 }
 
-func Deposit(symbol string, userId, sessionId, privateKey string, acountInfo ...string) ([]byte, error) {
+func Deposit(asset string, userId, sessionId, privateKey string) ([]byte, error) {
 	method := "GET"
-	uri := "/assets/" + symbolAssetId[symbol]
-	if symbol == EOS {
-		if len(acountInfo) == 2 {
-			body := P{
-				"account_name": acountInfo[0],
-				"account_tag":  acountInfo[1],
-			}
-			return MixinRequest(method, uri, body, userId, sessionId, privateKey)
-		}
-	}
-
+	uri := "/assets/" + asset
 	return MixinRequest(method, uri, nil, userId, sessionId, privateKey)
 }
 
-func Withdrawal(addressId, amount, memo string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
+func Withdrawal(addressId, amount, memo, trace string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
 	method := "POST"
 	uri := "/withdrawals"
 
@@ -63,56 +41,48 @@ func Withdrawal(addressId, amount, memo string, pinCode, pinToken, userId, sessi
 		"address_id": addressId,
 		"amount":     amount,
 		"pin":        EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano())),
-		"trace_id":   uuid.Must(uuid.NewV4()).String(),
+		"trace_id":   trace,
 		"memo":       memo,
 	}
 
 	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
 }
 
-func CreateAddress(symbol, address, label string, pinCode, pinToken, userId, sessionId, privateKey string, acountInfo ...string) ([]byte, error) {
+func CreateAddress(asset, publicOrName, labelOrTag string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
 	method := "POST"
 	uri := "/addresses"
 
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-
-	body := P{
-		"asset_id":   symbolAssetId[symbol],
-		"public_key": address,
-		"label":      label,
-		"pin":        pin,
+	params := P{"asset_id": asset, "pin": pin}
+	if asset == EOS {
+		params["account_name"] = publicOrName
+		params["account_tag"] = labelOrTag
+	} else {
+		params["public_key"] = publicOrName
+		params["label"] = labelOrTag
 	}
 
-	if symbol == EOS {
-		if len(acountInfo) == 2 {
-			body["account_name"] = acountInfo[0]
-			body["account_tag"] = acountInfo[1]
-		}
-	}
-	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
+	return MixinRequest(method, uri, params, userId, sessionId, privateKey)
 }
 
-func DeleteAddress(id string, pinCode, pinToken, usedId, sessionId, privateKey string) ([]byte, error) {
+func DeleteAddress(addressID string, pinCode, pinToken, usedId, sessionId, privateKey string) ([]byte, error) {
 	method := "POST"
-	uri := "/addresses/" + id + "/delete"
+	uri := "/addresses/" + addressID + "/delete"
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-
-	body := P{
-		"pin": pin,
-	}
-	return MixinRequest(method, uri, body, usedId, sessionId, privateKey)
+	params := P{"pin": pin}
+	return MixinRequest(method, uri, params, usedId, sessionId, privateKey)
 }
 
-func WithdrawalAddresses(symbol string, usedId, sessionId, privateKey string) ([]byte, error) {
-	return MixinRequest("GET", "/assets/"+symbolAssetId[symbol]+"/addresses", nil, usedId, sessionId, privateKey)
+func WithdrawalAddresses(assetID string, usedId, sessionId, privateKey string) ([]byte, error) {
+	return MixinRequest("GET", "/assets/"+assetID+"/addresses", nil, usedId, sessionId, privateKey)
 }
 
 func ReadAddress(addressId string, usedId, sessionId, privateKey string) ([]byte, error) {
 	return MixinRequest("GET", "/addresses/"+addressId, nil, usedId, sessionId, privateKey)
 }
 
-func ReadAsset(symbol string, usedId, sessionId, privateKey string) ([]byte, error) {
-	return MixinRequest("GET", "/assets/"+symbolAssetId[symbol], nil, usedId, sessionId, privateKey)
+func ReadAsset(assetID string, usedId, sessionId, privateKey string) ([]byte, error) {
+	return MixinRequest("GET", "/assets/"+assetID, nil, usedId, sessionId, privateKey)
 }
 
 func ReadAssets(usedId, sessionId, privateKey string) ([]byte, error) {
@@ -133,21 +103,17 @@ func VarifyPayment(opponent_id, amount, symbol, traceId string, usedId, sessionI
 	return MixinRequest(method, uri, body, usedId, sessionId, privateKey)
 }
 
-func Transfer(opponent_id, amount, symbol, memo string, pinCode, pinToken, userId, sessionId, privateKey string, traceId ...string) ([]byte, error) {
+func Transfer(opponentID, amount, asset, memo, trace string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
 	method := "POST"
 	uri := "/transfers"
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
 
-	trace_uuid := uuid.Must(uuid.NewV4()).String()
-	if len(traceId) > 0 {
-		trace_uuid = traceId[0]
-	}
 	body := P{
-		"asset_id":    symbolAssetId[symbol],
-		"opponent_id": opponent_id,
+		"asset_id":    asset,
+		"opponent_id": opponentID,
 		"amount":      amount,
 		"pin":         pin,
-		"trace_id":    trace_uuid,
+		"trace_id":    trace,
 		"memo":        memo,
 	}
 
@@ -159,11 +125,11 @@ func ReadTransfer(traceId string, usedId, sessionId, privateKey string) ([]byte,
 }
 
 func TopAssets(usedId, sessionId, privateKey string) ([]byte, error) {
-	return MixinRequest("GET", "/network", nil, usedId, sessionId, privateKey)
+	return MixinRequest("GET", "/network/assets/top", nil, usedId, sessionId, privateKey)
 }
 
-func SearchAssets(query string, usedId, sessionId, privateKey string) ([]byte, error) {
-	return MixinRequest("GET", "/network/assets/search/"+query, nil, usedId, sessionId, privateKey)
+func SearchAssets(symbol string, usedId, sessionId, privateKey string) ([]byte, error) {
+	return MixinRequest("GET", "/network/assets/search/"+symbol, nil, usedId, sessionId, privateKey)
 }
 
 func CreateAppUser(name, pin string, usedId, sessionId, privateKey string) (*User, error) {

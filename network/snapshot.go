@@ -1,73 +1,46 @@
 package network
 
-// func NetworkSnapshots(symbol, offset, limit, order string) ([]byte, error) {
-// 	method := "GET"
-// 	uri := "/network/snapshots"
-// 	query := make(P, 0)
+import "time"
 
-// 	count := "500"
-// 	if len(limit) > 0 {
-// 		count = limit
-// 	}
-// 	query["limit"] = count
+func NetworkSnapshots(asset string, offset time.Time, asc bool, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+	method := "GET"
+	uri := "/network/snapshots"
 
-// 	ts := time.Now().Add(-10 * time.Minute)
-// 	start := ts.Format(time.RFC3339Nano)
-// 	if len(offset) > 0 {
-// 		start = offset
-// 	}
-// 	query["offset"] = start
+	order := "DESC"
+	if asc {
+		order = "ASC"
+	}
+	params := P{
+		"limit":  limit,
+		"offset": offset.UTC().Format(time.RFC3339Nano),
+		"asset":  asset,
+		"order":  order,
+	}
 
-// 	asset := ""
-// 	if len(symbol) > 0 {
-// 		asset = symbolAssetId[symbol]
-// 	}
-// 	query["asset"] = asset
+	return MixinRequest(method, uri, params, usedId, sessionId, privateKey)
+}
 
-// 	orderBy := "DESC"
-// 	if len(order) > 0 {
-// 		orderBy = order
-// 	}
-// 	query["order"] = orderBy
+func NetworkSnapshot(snapshotID string, usedId, sessionId, privateKey string) ([]byte, error) {
+	method := "GET"
+	uri := "/network/snapshots/" + snapshotID
+	return MixinRequest(method, uri, nil, usedId, sessionId, privateKey)
+}
 
-// 	return MixinRequest(method, uri, query)
-// }
+func ExternalTransactions(asset, publicKeyOrTag, emptyOrName string, offset time.Time, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+	method := "GET"
+	uri := "/external/transactions"
 
-// func NetworkSnapshot(snapshot_id string) ([]byte, error) {
-// 	method := "GET"
-// 	uri := "/network/snapshots/" + snapshot_id
-// 	return MixinRequest(method, uri)
-// }
+	params := P{
+		"asset":  asset,
+		"limit":  limit,
+		"offset": offset.UTC().Format(time.RFC3339Nano),
+	}
+	if len(emptyOrName) == 0 {
+		params["public_key"] = publicKeyOrTag
+	} else {
+		params["account_tag"] = publicKeyOrTag
+		params["account_name"] = emptyOrName
+	}
 
-// func ExternalTransactions(symbol, public_key, limit, offset string, account_info ...P) ([]byte, error) {
-// 	method := "GET"
-// 	uri := "/external/transactions"
-// 	query := make(P, 0)
-
-// 	count := "500"
-// 	if len(limit) > 0 {
-// 		count = limit
-// 	}
-// 	query["limit"] = count
-
-// 	ts := time.Now().Add(-10 * time.Minute)
-// 	start := ts.Format(time.RFC3339Nano)
-// 	if len(offset) > 0 {
-// 		start = offset
-// 	}
-// 	query["offset"] = start
-
-// 	asset := ""
-// 	if len(symbol) > 0 {
-// 		asset = symbolAssetId[symbol]
-// 	}
-// 	query["asset"] = asset
-
-// 	if symbol == "EOS" {
-// 		for k, v := range account_info[0] {
-// 			query[k] = v
-// 		}
-// 	}
-
-// 	return MixinRequest(method, uri, query)
-// }
+	return MixinRequest(method, uri, params, usedId, sessionId, privateKey)
+}

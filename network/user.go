@@ -82,7 +82,7 @@ func (u User) Withdrawal(asset, address, amount string, name ...string) ([]byte,
 		"amount":     amount,
 		"pin":        EncryptPIN(u.PinCode, u.PinToken, u.SessionId, u.PrivateKey, uint64(time.Now().UnixNano())),
 		"trace_id":   uuid.Must(uuid.NewV4()).String(),
-		"memo":       "Created By Mibot",
+		"memo":       "long live the bitcoin",
 	}
 
 	return u.MixinRequest(method, uri, body)

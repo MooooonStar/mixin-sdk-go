@@ -9,20 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/json-iterator/go"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type P map[string]interface{}
 
-const (
-	baseUrl = "https://api.mixin.one"
-)
-
-var client *http.Client
-
-func init() {
-	client = &http.Client{Timeout: time.Duration(30 * time.Second)}
-}
+var httpClient = &http.Client{Timeout: time.Duration(10 * time.Second)}
 
 func Request(method, uri string, body []byte, userId, sessionId, privateKey string) ([]byte, error) {
 	token, err := SignAuthenticationToken(userId, sessionId, privateKey, method, uri, string(body))
@@ -30,14 +22,14 @@ func Request(method, uri string, body []byte, userId, sessionId, privateKey stri
 		return nil, err
 	}
 
-	req, err := http.NewRequest(method, baseUrl+uri, bytes.NewReader(body))
+	req, err := http.NewRequest(method, "https://api.mixin.one"+uri, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	resp, err := client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +49,7 @@ func Request(method, uri string, body []byte, userId, sessionId, privateKey stri
 }
 
 func MixinRequest(method, uri string, params P, userId, sessionId, privateKey string) ([]byte, error) {
-	if len(params) == 0 {
+	if params == nil {
 		return Request(method, uri, nil, userId, sessionId, privateKey)
 	}
 

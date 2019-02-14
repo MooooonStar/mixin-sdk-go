@@ -11,30 +11,32 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/go-redis/redis"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-var moon_id = "825d5134-c921-3cf9-a83b-848b73"
-var moon_cnb = "0x0EC770FD731C04DcDdDBca97176DC5f6af2AbeF4"
+var snow = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
+var snowCNBAddr = "0x4fE05eBB326f52A671247d693a56771e29E1b5EA"
 
 func TestVerifyPin(t *testing.T) {
-	data, err := VerifyPIN("759948", PinToken, UserId, SessionId, PrivateKey)
+	data, err := VerifyPIN(PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
 
 func TestDeposit(t *testing.T) {
-	data, err := Deposit("CNB", UserId, SessionId, PrivateKey)
+	data, err := Deposit(CNB, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
 
 func TestCreateAddress(t *testing.T) {
-	data, err := CreateAddress("CNB", moon_cnb, "CNB Address", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	data, err := CreateAddress(CNB, snowCNBAddr, "CNB Address", PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestReadAddresses(t *testing.T) {
@@ -44,69 +46,69 @@ func TestReadAddresses(t *testing.T) {
 }
 
 func TestReadAsset(t *testing.T) {
-	data, err := ReadAsset("CNB", UserId, SessionId, PrivateKey)
+	data, err := ReadAsset(EOS, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println("cnb")
 	log.Println(string(data))
 }
 
 func TestReadAssets(t *testing.T) {
 	data, err := ReadAssets(UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println("hello")
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestVerifyPayment(t *testing.T) {
 	data, err := VarifyPayment("825d5134-c921-3cf9-a83b-848b73c9e83b", "10", "CNB", "34fd7fee-6b14-4a24-82e1-6411768b9370", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestTransfer(t *testing.T) {
-	data, err := Transfer(moon_id, "10", "CNB", "transfer test", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	trace := uuid.Must(uuid.NewV4()).String()
+	data, err := Transfer(snow, "10", CNB, "transfer test", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestWithdraw(t *testing.T) {
-	data, err := Withdrawal("814a0195-2048-4e09-b932-48f0b39b559b", "10", "from mibot", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	trace := uuid.Must(uuid.NewV4()).String()
+	data, err := Withdrawal("5dfe3f1e-7022-4f37-901d-49febaf485bf", "11", "Hello", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestReadTransfer(t *testing.T) {
-	data, err := ReadTransfer("5a882c2c-6ea9-4f57-94b6-484f713d3f82", UserId, SessionId, PrivateKey)
+	data, err := ReadTransfer("6ac2ee21-a9ef-4b52-8774-d4d18a622161", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
 
 func TestWithdrawalAddresses(t *testing.T) {
-	data, err := WithdrawalAddresses("CNB", UserId, SessionId, PrivateKey)
+	data, err := WithdrawalAddresses(CNB, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
 func TestTopAssets(t *testing.T) {
 	data, err := TopAssets(UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(data)
+	log.Println(string(data))
 }
 
-// func TestNetworkSnapshots(t *testing.T) {
-// 	data, err := NetworkSnapshots("BTC", "", "10", "ASC")
-// 	assert.Nil(t, err)
-// 	log.Println(data)
-// }
+func TestNetworkSnapshots(t *testing.T) {
+	data, err := NetworkSnapshots(XIN, time.Now().Add(-1*time.Hour), true, 3, UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	log.Println(string(data))
+}
 
-// func TestNetworkSnapshot(t *testing.T) {
-// 	data, err := NetworkSnapshot("04ab3fe1-c817-45b3-a81d-26852b80b200")
-// 	assert.Nil(t, err)
-// 	log.Println(data)
-// }
+func TestNetworkSnapshot(t *testing.T) {
+	data, err := NetworkSnapshot("cb7f1f3b-8987-4712-8235-e801f1ccd042", UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	log.Println(string(data))
+}
 
 // func TestExternalTransactions(t *testing.T) {
-// 	data, err := ExternalTransactions("CNB", moon_cnb, "", "")
+// 	data, err := ExternalTransactions(CNB, moon_cnb, "", "")
 // 	assert.Nil(t, err)
 // 	log.Println(data)
 // }
