@@ -11,66 +11,54 @@ import (
 )
 
 func CreatePIN(old_pin, new_pin, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
-	uri := "/pin/update"
-	oldEncryptedPin := EncryptPIN(old_pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
+	var oldEncryptedPin string
+	if len(old_pin) > 0 {
+		oldEncryptedPin = EncryptPIN(old_pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
+	}
 	newEncryptedPin := EncryptPIN(new_pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-	body := P{"old_pin": oldEncryptedPin, "pin": newEncryptedPin}
-	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
+	params := P{"old_pin": oldEncryptedPin, "pin": newEncryptedPin}
+	return MixinRequest("POST", "/pin/update", params, userId, sessionId, privateKey)
 }
 
 func VerifyPIN(pin, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
-	uri := "/pin/verify"
 	encryptedPin := EncryptPIN(pin, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
 	body := P{"pin": encryptedPin}
-	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
+	return MixinRequest("POST", "/pin/verify", body, userId, sessionId, privateKey)
 }
 
-func Deposit(asset string, userId, sessionId, privateKey string) ([]byte, error) {
-	method := "GET"
-	uri := "/assets/" + asset
-	return MixinRequest(method, uri, nil, userId, sessionId, privateKey)
+func Deposit(assetID string, userId, sessionId, privateKey string) ([]byte, error) {
+	return MixinRequest("GET", "/assets/"+assetID, nil, userId, sessionId, privateKey)
 }
 
 func Withdrawal(addressId, amount, memo, trace string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
-	uri := "/withdrawals"
-
-	body := P{
+	params := P{
 		"address_id": addressId,
 		"amount":     amount,
 		"pin":        EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano())),
 		"trace_id":   trace,
 		"memo":       memo,
 	}
-
-	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
+	return MixinRequest("POST", "/withdrawals", params, userId, sessionId, privateKey)
 }
 
-func CreateAddress(asset, publicOrName, labelOrTag string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
-	uri := "/addresses"
-
+func CreateAddress(assetID, publicOrName, labelOrTag string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-	params := P{"asset_id": asset, "pin": pin}
-	if asset == EOS {
+	params := P{"asset_id": assetID, "pin": pin}
+	if assetID == EOS {
 		params["account_name"] = publicOrName
 		params["account_tag"] = labelOrTag
 	} else {
 		params["public_key"] = publicOrName
 		params["label"] = labelOrTag
 	}
-
-	return MixinRequest(method, uri, params, userId, sessionId, privateKey)
+	return MixinRequest("POST", "/addresses", params, userId, sessionId, privateKey)
 }
 
 func DeleteAddress(addressID string, pinCode, pinToken, usedId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
 	uri := "/addresses/" + addressID + "/delete"
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
 	params := P{"pin": pin}
-	return MixinRequest(method, uri, params, usedId, sessionId, privateKey)
+	return MixinRequest("POST", uri, params, usedId, sessionId, privateKey)
 }
 
 func WithdrawalAddresses(assetID string, usedId, sessionId, privateKey string) ([]byte, error) {
@@ -86,29 +74,22 @@ func ReadAsset(assetID string, usedId, sessionId, privateKey string) ([]byte, er
 }
 
 func ReadAssets(usedId, sessionId, privateKey string) ([]byte, error) {
-	method := "GET"
-	uri := "/assets"
-	return MixinRequest(method, uri, nil, usedId, sessionId, privateKey)
+	return MixinRequest("GET", "/assets", nil, usedId, sessionId, privateKey)
 }
 
 func VarifyPayment(opponent_id, amount, symbol, traceId string, usedId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
-	uri := "/payments"
-	body := P{
+	params := P{
 		"asset_id":    symbolAssetId[symbol],
 		"opponent_id": opponent_id,
 		"amount":      amount,
 		"trace_id":    traceId,
 	}
-	return MixinRequest(method, uri, body, usedId, sessionId, privateKey)
+	return MixinRequest("POST", "/payments", params, usedId, sessionId, privateKey)
 }
 
 func Transfer(opponentID, amount, asset, memo, trace string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
-	method := "POST"
-	uri := "/transfers"
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
-
-	body := P{
+	params := P{
 		"asset_id":    asset,
 		"opponent_id": opponentID,
 		"amount":      amount,
@@ -116,8 +97,7 @@ func Transfer(opponentID, amount, asset, memo, trace string, pinCode, pinToken, 
 		"trace_id":    trace,
 		"memo":        memo,
 	}
-
-	return MixinRequest(method, uri, body, userId, sessionId, privateKey)
+	return MixinRequest("POST", "/transfers", params, userId, sessionId, privateKey)
 }
 
 func ReadTransfer(traceId string, usedId, sessionId, privateKey string) ([]byte, error) {

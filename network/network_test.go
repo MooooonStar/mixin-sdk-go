@@ -1,19 +1,11 @@
 package network
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/base64"
-	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"log"
-	"os"
 	"testing"
 	"time"
 
-	"github.com/go-redis/redis"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,7 +26,10 @@ func TestDeposit(t *testing.T) {
 }
 
 func TestCreateAddress(t *testing.T) {
-	data, err := CreateAddress(CNB, snowCNBAddr, "CNB Address", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	// data, err := CreateAddress(CNB, snowCNBAddr, "CNB Address", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	// assert.Nil(t, err)
+	// log.Println(string(data))
+	data, err := CreateAddress(EOS, "eoswithmixin", "a282d3c9e6f121db99f728a5f8e3ff64", PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -72,7 +67,8 @@ func TestTransfer(t *testing.T) {
 
 func TestWithdraw(t *testing.T) {
 	trace := uuid.Must(uuid.NewV4()).String()
-	data, err := Withdrawal("5dfe3f1e-7022-4f37-901d-49febaf485bf", "11", "Hello", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
+	//data, err := Withdrawal("5dfe3f1e-7022-4f37-901d-49febaf485bf", "11", "Hello", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
+	data, err := Withdrawal("4ceab4e8-79e9-4be5-8c5d-93e264ec3589", "0.0001", "Hi", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -125,47 +121,11 @@ func TestReadUser(t *testing.T) {
 	fmt.Println("data:", string(data))
 }
 
-var BotSessionSecret string
-
-func TestRSA(t *testing.T) {
-	fmt.Println("Save the following infomation.")
-
-	privateKey, _ := rsa.GenerateKey(rand.Reader, 1024)
-	block := x509.MarshalPKCS1PrivateKey(privateKey)
-	privateSecret := base64.StdEncoding.EncodeToString(block)
-	fmt.Println("privateSecret:", privateSecret)
-
-	b := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: block,
-	}
-	bt := pem.EncodeToMemory(b)
-	fmt.Println("bt", string(bt))
-	assert.Nil(t, pem.Encode(os.Stdout, b))
-
-	publicKeyBytes, _ := x509.MarshalPKIXPublicKey(privateKey.Public())
-	pubBlock := &pem.Block{
-		Type:  "RSA PUBLIC KEY",
-		Bytes: publicKeyBytes,
-	}
-	assert.Nil(t, pem.Encode(os.Stdout, pubBlock))
-
-	BotSessionSecret := base64.StdEncoding.EncodeToString(publicKeyBytes)
-	fmt.Println("sessionSecret:", BotSessionSecret)
-
-}
-
 func TestCreateAppUser(t *testing.T) {
-	user, err := CreateAppUser("sf", "123456", UserId, SessionId, PrivateKey)
+	user, err := CreateAppUser("no one", "123456", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 
-	client := redis.NewClient(&redis.Options{
-		Addr: "127.0.0.1:6379",
-		DB:   1,
-	})
-	bt, err := json.Marshal(user)
+	info, err := user.ReadProfile()
 	assert.Nil(t, err)
-	_, err = client.HSet("mixin_users", user.FullName, string(bt)).Result()
-	assert.Nil(t, err)
-	log.Println("")
+	log.Println(string(info))
 }
