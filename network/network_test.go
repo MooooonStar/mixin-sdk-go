@@ -91,6 +91,12 @@ func TestTopAssets(t *testing.T) {
 	log.Println(string(data))
 }
 
+func TestNetworkAssets(t *testing.T) {
+	data, err := NetworkAsset(BTC, UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	log.Println(string(data))
+}
+
 func TestNetworkSnapshots(t *testing.T) {
 	data, err := NetworkSnapshots(XIN, time.Now().Add(-1*time.Hour), true, 3, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)

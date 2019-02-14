@@ -61,12 +61,12 @@ func DeleteAddress(addressID string, pinCode, pinToken, usedId, sessionId, priva
 	return MixinRequest("POST", uri, params, usedId, sessionId, privateKey)
 }
 
-func WithdrawalAddresses(assetID string, usedId, sessionId, privateKey string) ([]byte, error) {
-	return MixinRequest("GET", "/assets/"+assetID+"/addresses", nil, usedId, sessionId, privateKey)
-}
-
 func ReadAddress(addressId string, usedId, sessionId, privateKey string) ([]byte, error) {
 	return MixinRequest("GET", "/addresses/"+addressId, nil, usedId, sessionId, privateKey)
+}
+
+func WithdrawalAddresses(assetID string, usedId, sessionId, privateKey string) ([]byte, error) {
+	return MixinRequest("GET", "/assets/"+assetID+"/addresses", nil, usedId, sessionId, privateKey)
 }
 
 func ReadAsset(assetID string, usedId, sessionId, privateKey string) ([]byte, error) {
@@ -106,6 +106,10 @@ func ReadTransfer(traceId string, usedId, sessionId, privateKey string) ([]byte,
 
 func TopAssets(usedId, sessionId, privateKey string) ([]byte, error) {
 	return MixinRequest("GET", "/network/assets/top", nil, usedId, sessionId, privateKey)
+}
+
+func NetworkAsset(assetID, usedId, sessionId, privateKey string) ([]byte, error) {
+	return MixinRequest("GET", "/network/assets/"+assetID, nil, usedId, sessionId, privateKey)
 }
 
 func SearchAssets(symbol string, usedId, sessionId, privateKey string) ([]byte, error) {
