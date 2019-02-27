@@ -19,7 +19,7 @@ messenger/*.pdf
 network/example/example
 messenger/example/example
 
-network/config.go
+network/config.*.go
 network/example/config.local.go
-messenger/config.go
+messenger/config.*.go
 messenger/example/config.local.go

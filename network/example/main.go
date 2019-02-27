@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	mixin "github.com/MooooonStar/mixin-sdk-go/network"
+	"github.com/MooooonStar/mixin-sdk-go/network"
 )
 
 func main() {
-	user := mixin.NewUser(UserId, SessionId, PrivateKey, PinCode, PinToken)
-	//user := mixin.NewUser(UserId, SessionId, PrivateKey)
+	user := network.NewUser(network.UserId, network.SessionId, network.PrivateKey, network.PinCode, network.PinToken)
+	//user := newwork.NewUser(network.UserId, network.SessionId, network.PrivateKey)
 
 	profile, err := user.ReadProfile()
 	if err != nil {

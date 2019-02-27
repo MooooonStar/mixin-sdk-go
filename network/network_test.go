@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	prettyjson "github.com/hokaccha/go-prettyjson"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,7 +42,7 @@ func TestReadAddresses(t *testing.T) {
 }
 
 func TestReadAsset(t *testing.T) {
-	data, err := ReadAsset(EOS, UserId, SessionId, PrivateKey)
+	data, err := ReadAsset(CNB, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -60,9 +61,10 @@ func TestVerifyPayment(t *testing.T) {
 
 func TestTransfer(t *testing.T) {
 	trace := uuid.Must(uuid.NewV4()).String()
-	data, err := Transfer(snow, "10", CNB, "transfer test", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
+	data, err := Transfer(snow, "112", "69b2d237-1eb2-3b6c-8e1d-3876e507b263", "test min amount", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(string(data))
+	v, _ := prettyjson.Format(data)
+	log.Println(string(v))
 }
 
 func TestWithdraw(t *testing.T) {
@@ -98,19 +100,21 @@ func TestNetworkAssets(t *testing.T) {
 }
 
 func TestNetworkSnapshots(t *testing.T) {
-	data, err := NetworkSnapshots(XIN, time.Now().Add(-1*time.Hour), true, 3, UserId, SessionId, PrivateKey)
+	data, err := NetworkSnapshots(CNB, time.Now().Add(-1*time.Hour), true, 10, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	log.Println(string(data))
+	v, _ := prettyjson.Format(data)
+	log.Println(string(v))
 }
 
 func TestNetworkSnapshot(t *testing.T) {
-	data, err := NetworkSnapshot("cb7f1f3b-8987-4712-8235-e801f1ccd042", UserId, SessionId, PrivateKey)
+	data, err := NetworkSnapshot("01f20aa2-2e76-4d76-a4c0-c502b8934fc7", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
 
 func TestExternalTransactions(t *testing.T) {
-	data, err := ExternalTransactions(CNB, "0x4fE05eBB326f52A671247d693a56771e29E1b5EA", "", time.Now().Add(-24*time.Hour), 10, UserId, SessionId, PrivateKey)
+	offset, _ := time.Parse(time.RFC3339Nano, "2019-01-01T15:04:05.999999999Z")
+	data, err := ExternalTransactions("", "", "", offset, 10, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -122,7 +126,7 @@ func TestSearchUser(t *testing.T) {
 }
 
 func TestReadUser(t *testing.T) {
-	data, err := MixinRequest("GET", "/users/"+"d24fae70-32a0-453d-b5a8-980b76565297", nil, UserId, SessionId, PrivateKey)
+	data, err := MixinRequest("GET", "/users/"+"14521f6b-2619-41ba-89ff-d440330cbde0", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }
