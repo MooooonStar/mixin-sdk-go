@@ -69,8 +69,8 @@ func (u User) Withdrawal(assetID, publicOrName, labelOrTag, amount, memo, trace 
 	return Withdrawal(addressID, amount, memo, trace, u.PinCode, u.PinToken, u.UserId, u.SessionId, u.PrivateKey)
 }
 
-func (u User) VarifyPayment(opponentID, amount, assetID, traceID string) ([]byte, error) {
-	return VarifyPayment(opponentID, amount, assetID, traceID, u.UserId, u.SessionId, u.PrivateKey)
+func (u User) VerifyPayment(opponentID, amount, assetID, traceID string) ([]byte, error) {
+	return VerifyPayment(opponentID, amount, assetID, traceID, u.UserId, u.SessionId, u.PrivateKey)
 }
 
 func (u User) Transfer(opponentID, amount, assetID, memo, traceID string) ([]byte, error) {
