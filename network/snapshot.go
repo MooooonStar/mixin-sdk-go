@@ -17,6 +17,22 @@ func NetworkSnapshots(asset string, offset time.Time, asc bool, limit int, usedI
 	return MixinRequest("GET", "/network/snapshots", params, usedId, sessionId, privateKey)
 }
 
+func NetworkUserSnapshots(asset string, offset string, asc bool, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+	order := "DESC"
+	if asc {
+		order = "ASC"
+	}
+	params := P{
+		"limit":  limit,
+		"offset": offset,
+		"asset":  asset,
+		"order":  order,
+	}
+
+	return MixinRequest("GET", "/network/snapshots", params, usedId, sessionId, privateKey)
+}
+
+
 func NetworkSnapshot(snapshotID string, usedId, sessionId, privateKey string) ([]byte, error) {
 	return MixinRequest("GET", "/network/snapshots/"+snapshotID, nil, usedId, sessionId, privateKey)
 }
