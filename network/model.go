@@ -21,3 +21,5 @@ type Asset struct {
 	Symbol   string `json:"symbol"`
 	Type     string `json:"type"`
 }
+
+

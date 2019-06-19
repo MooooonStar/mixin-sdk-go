@@ -48,7 +48,8 @@ func (l defaultBlazeListener) OnMessage(ctx context.Context, msg MessageView, us
 		if err := json.Unmarshal(data, &transfer); err != nil {
 			return err
 		}
-		log.Println("I got a snapshot: ", transfer)
+		bt, _ := json.Marshal(transfer)
+		log.Println("I got a snapshot: ", string(bt))
 		return nil
 	} else {
 		log.Printf("I got a message, it said: %s", string(data))
