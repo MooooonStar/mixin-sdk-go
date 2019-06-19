@@ -77,10 +77,10 @@ func ReadAssets(usedId, sessionId, privateKey string) ([]byte, error) {
 	return MixinRequest("GET", "/assets", nil, usedId, sessionId, privateKey)
 }
 
-func VerifyPayment(opponent_id, amount, symbol, traceId string, usedId, sessionId, privateKey string) ([]byte, error) {
+func VerifyPayment(opponentId, amount, assetId, traceId string, usedId, sessionId, privateKey string) ([]byte, error) {
 	params := P{
-		"asset_id":    symbolAssetId[symbol],
-		"opponent_id": opponent_id,
+		"asset_id":    assetId,
+		"opponent_id": opponentId,
 		"amount":      amount,
 		"trace_id":    traceId,
 	}
