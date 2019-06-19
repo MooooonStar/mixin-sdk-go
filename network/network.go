@@ -41,15 +41,15 @@ func Withdrawal(addressId, amount, memo, trace string, pinCode, pinToken, userId
 	return MixinRequest("POST", "/withdrawals", params, userId, sessionId, privateKey)
 }
 
-func CreateAddress(assetID, publicOrName, labelOrTag string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
+func CreateAddress(assetID, publicOrName, emptyOrTag string, pinCode, pinToken, userId, sessionId, privateKey string) ([]byte, error) {
 	pin := EncryptPIN(pinCode, pinToken, sessionId, privateKey, uint64(time.Now().UnixNano()))
 	params := P{"asset_id": assetID, "pin": pin}
-	if assetID == EOS {
+	if emptyOrTag != "" {
 		params["account_name"] = publicOrName
-		params["account_tag"] = labelOrTag
+		params["account_tag"] = emptyOrTag
 	} else {
 		params["public_key"] = publicOrName
-		params["label"] = labelOrTag
+		params["label"] = emptyOrTag
 	}
 	return MixinRequest("POST", "/addresses", params, userId, sessionId, privateKey)
 }

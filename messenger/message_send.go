@@ -8,6 +8,7 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
 	"io/ioutil"
 	"math"
 	"os"
@@ -207,12 +208,8 @@ func (b *Messenger) SendGroupMessage(ctx context.Context, content string, recipi
 }
 
 // send image in one step, upload to s3 first then to user.
-func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId string, filename string) error {
-	file, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	bt, err := ioutil.ReadAll(file)
+func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId string, r io.Reader) error {
+	bt, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
@@ -221,7 +218,7 @@ func (b *Messenger) SendImage(ctx context.Context, conversationId, recipientId s
 		return err
 	}
 
-	id, _, err := b.Upload(ctx, bt)
+	id, _, err := b.Upload(ctx, bytes.NewReader(bt))
 	if err != nil {
 		return err
 	}
@@ -241,11 +238,7 @@ func (b *Messenger) SendVideo(ctx context.Context, conversationId, recipientId s
 	if err != nil {
 		return err
 	}
-	bt, err := ioutil.ReadAll(file)
-	if err != nil {
-		return err
-	}
-	id, _, err := b.Upload(ctx, bt)
+	id, _, err := b.Upload(ctx, file)
 	if err != nil {
 		return err
 	}
@@ -294,16 +287,12 @@ func (b *Messenger) SendVideo(ctx context.Context, conversationId, recipientId s
 	return b.SendPlainVideo(ctx, conversationId, recipientId, video)
 }
 
-func (m *Messenger) SendFile(ctx context.Context, conversationId, recipientId string, filename string, mimeType string) error {
-	file, err := os.Open(filename)
+func (m *Messenger) SendFile(ctx context.Context, conversationId, recipientId string, filename, mimeType string, r io.Reader) error {
+	bt, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
-	bt, err := ioutil.ReadAll(file)
-	if err != nil {
-		return err
-	}
-	id, _, err := m.Upload(context.Background(), bt)
+	id, _, err := m.Upload(ctx, bytes.NewReader(bt))
 	if err != nil {
 		return err
 	}

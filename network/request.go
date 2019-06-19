@@ -38,10 +38,10 @@ func Request(method, uri string, body []byte, userId, sessionId, privateKey stri
 	bt, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		var resp struct {
-			Error Error `json:"error"`
+			Error `json:"error"`
 		}
-		err = json.Unmarshal(bt, &resp)
-		if err == nil {
+		json.Unmarshal(bt, &resp)
+		if resp.Code > 0 {
 			err = resp.Error
 		}
 	}
@@ -54,7 +54,7 @@ func MixinRequest(method, uri string, params P, userId, sessionId, privateKey st
 	}
 
 	switch method {
-	case "GET":
+	case "GET", "DELETE":
 		str := make([]string, 0)
 		for k, v := range params {
 			str = append(str, fmt.Sprintf("%v=%v", k, v))

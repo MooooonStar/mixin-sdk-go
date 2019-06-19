@@ -13,7 +13,7 @@ import (
 
 	mixin "github.com/MooooonStar/mixin-sdk-go/network"
 	"github.com/gorilla/websocket"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (

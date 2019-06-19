@@ -2,18 +2,13 @@ package network
 
 import "time"
 
-func NetworkSnapshots(asset string, offset time.Time, asc bool, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
-	order := "DESC"
-	if asc {
-		order = "ASC"
-	}
+func NetworkSnapshots(asset string, offset time.Time, order string, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
 	params := P{
 		"limit":  limit,
 		"offset": offset.UTC().Format(time.RFC3339Nano),
 		"asset":  asset,
 		"order":  order,
 	}
-
 	return MixinRequest("GET", "/network/snapshots", params, usedId, sessionId, privateKey)
 }
 

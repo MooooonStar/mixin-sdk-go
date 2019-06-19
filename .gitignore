@@ -15,11 +15,11 @@
 
 messenger/*.mp4
 messenger/*.pdf
+messenger/*.png
 
 network/example/example
 messenger/example/example
 
-network/config.*.go
-network/example/config.local.go
+network/config.*
 messenger/config.*.go
 messenger/example/config.local.go

@@ -1,29 +1,32 @@
 package messenger
 
 import (
+	"bytes"
 	"context"
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 )
 
-var m *Messenger
-var conversationId, snow, soon string
-var ctx context.Context
+var (
+	m                          *Messenger
+	ctx                        context.Context
+	conversationId, snow, soon string
+)
 
 func init() {
 	m = NewMessenger(UserId, SessionId, PrivateKey)
 	ctx = context.Background()
-	go m.Run(ctx, DefaultBlazeListener{})
+	go m.Run(ctx, DefaultBlazeListener)
 	snow = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
-	soon = "cd345a58-2c40-4519-9533-d50a1e1b8238"
+	soon = snow
 	conversationId = UniqueConversationId(m.UserId, snow)
 }
 
 func TestSendText(t *testing.T) {
-	if err := m.SendPlainText(ctx, conversationId, snow, "hello!"); err != nil {
-		panic(err)
+	err := m.SendPlainText(ctx, conversationId, snow, "hello!")
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -31,41 +34,42 @@ func TestSendAppCard(t *testing.T) {
 	card := AppCard{Title: "CNB", Description: "Chui Niu Bi", Action: "http://www.google.cn",
 		IconUrl: "https://images.mixin.one/0sQY63dDMkWTURkJVjowWY6Le4ICjAFuu3ANVyZA4uI3UdkbuOT5fjJUT82ArNYmZvVcxDXyNjxoOv0TAYbQTNKS=s128"}
 	if err := m.SendAppCard(ctx, conversationId, snow, card); err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
+
 func TestSendAppButton(t *testing.T) {
 	google := Button{Label: "google", Color: "#ABABAB", Action: "https://www.google.cn"}
 	baidu := Button{Label: "baidu", Color: "#BABABA", Action: "https://www.baidu.com"}
 	if err := m.SendAppButtons(ctx, conversationId, snow, google, baidu); err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 
 func TestSendContact(t *testing.T) {
 	if err := m.SendPlainContact(ctx, conversationId, snow, "c7ff704e-1a74-4f12-b05c-7a2be955a782"); err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 
 func TestSendSticker(t *testing.T) {
 	if err := m.SendPlainSticker(ctx, conversationId, snow, "b14bc6e3-b1ac-45fd-a5e2-60340c9880ef"); err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 
 func TestSendPlainImage(t *testing.T) {
 	file, err := os.Open("donate.png")
 	if err != nil {
-		log.Fatal("open", err)
+		t.Error(err)
 	}
 	bt, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Fatal("read", err)
+		t.Error(err)
 	}
-	id, _, err := m.Upload(ctx, bt)
+	id, _, err := m.Upload(ctx, bytes.NewReader(bt))
 	if err != nil {
-		log.Fatal("upload", err)
+		t.Error(err)
 	}
 
 	image := Multimedia{
@@ -75,40 +79,52 @@ func TestSendPlainImage(t *testing.T) {
 		Height:       256,
 	}
 	if err := m.SendPlainImage(ctx, conversationId, snow, image); err != nil {
-		log.Fatal("send", err)
+		t.Error(err)
 	}
 }
 
 func TestSendVideo(t *testing.T) {
-	if err := m.SendVideo(ctx, conversationId, snow, "sample.mp4"); err != nil {
-		panic(err)
+	err := m.SendVideo(ctx, conversationId, snow, "sample.mp4")
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestSendImage(t *testing.T) {
-	if err := m.SendImage(ctx, conversationId, snow, "donate.png"); err != nil {
-		panic(err)
+	file, err := os.Open("donate.png")
+	if err != nil {
+		t.Error(err)
+	}
+	err = m.SendImage(ctx, conversationId, snow, file)
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestSendFile(t *testing.T) {
-	if err := m.SendFile(ctx, conversationId, snow, "demo.pdf", "application/pdf"); err != nil {
-		panic(err)
+	filename := "demo.pdf"
+	file, err := os.Open(filename)
+	if err != nil {
+		t.Error(err)
+	}
+	err = m.SendFile(ctx, conversationId, snow, filename, "application/pdf", file)
+	if err != nil {
+		t.Error(err)
 	}
 }
 
 func TestSendPlainData(t *testing.T) {
 	file, err := os.Open("123.mp4")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	bt, err := ioutil.ReadAll(file)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
-	id, _, err := m.Upload(context.Background(), bt)
+	id, _, err := m.Upload(ctx, bytes.NewBuffer(bt))
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	media := Multimedia{
 		Name:         "123.mp4",
@@ -117,7 +133,7 @@ func TestSendPlainData(t *testing.T) {
 		MimeType:     "video/mp4",
 	}
 	if err := m.SendPlainData(ctx, conversationId, snow, media); err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 

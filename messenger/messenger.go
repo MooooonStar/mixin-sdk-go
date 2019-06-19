@@ -33,10 +33,12 @@ func (m *Messenger) Run(ctx context.Context, listener BlazeListener) {
 	}
 }
 
-type DefaultBlazeListener struct{}
+var DefaultBlazeListener = &defaultBlazeListener{}
+
+type defaultBlazeListener struct{}
 
 // interface to implement if you want to handle the message
-func (l DefaultBlazeListener) OnMessage(ctx context.Context, msg MessageView, userId string) error {
+func (l defaultBlazeListener) OnMessage(ctx context.Context, msg MessageView, userId string) error {
 	data, err := base64.StdEncoding.DecodeString(msg.Data)
 	if err != nil {
 		return err

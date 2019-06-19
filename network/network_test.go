@@ -27,12 +27,12 @@ func TestDeposit(t *testing.T) {
 }
 
 func TestCreateAddress(t *testing.T) {
-	// data, err := CreateAddress(CNB, snowCNBAddr, "CNB Address", PinCode, PinToken, UserId, SessionId, PrivateKey)
-	// assert.Nil(t, err)
-	// log.Println(string(data))
-	data, err := CreateAddress(EOS, "eoswithmixin", "a282d3c9e6f121db99f728a5f8e3ff64", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	data, err := CreateAddress(CNB, "0x4fE05eBB326f52A671247d693a56771e29E1b5EA", "haha", PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
+	// data, err := CreateAddress(EOS, "eoswithmixin", "a282d3c9e6f121db99f728a5f8e3ff64", PinCode, PinToken, UserId, SessionId, PrivateKey)
+	// assert.Nil(t, err)
+	// log.Println(string(data))
 }
 
 func TestReadAddresses(t *testing.T) {
@@ -42,7 +42,7 @@ func TestReadAddresses(t *testing.T) {
 }
 
 func TestReadAsset(t *testing.T) {
-	data, err := ReadAsset(CNB, UserId, SessionId, PrivateKey)
+	data, err := ReadAsset(BTC, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -61,7 +61,7 @@ func TestVerifyPayment(t *testing.T) {
 
 func TestTransfer(t *testing.T) {
 	trace := uuid.Must(uuid.NewV4()).String()
-	data, err := Transfer(snow, "112", "69b2d237-1eb2-3b6c-8e1d-3876e507b263", "test min amount", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
+	data, err := Transfer("7b3f0a95-3ee9-4c1b-8ae9-170e3877d909", "10", CNB, "test transfer", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	v, _ := prettyjson.Format(data)
 	log.Println(string(v))
@@ -100,14 +100,16 @@ func TestNetworkAssets(t *testing.T) {
 }
 
 func TestNetworkSnapshots(t *testing.T) {
-	data, err := NetworkSnapshots(CNB, time.Now().Add(-1*time.Hour), true, 10, UserId, SessionId, PrivateKey)
+	// 2019-04-08T07:34:16.556276Z
+	checkpoint, _ := time.Parse(time.RFC3339Nano, "2019-04-08T05:33:41.100000Z")
+	data, err := NetworkSnapshots("", checkpoint, "DESC", 10, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	v, _ := prettyjson.Format(data)
 	log.Println(string(v))
 }
 
 func TestNetworkSnapshot(t *testing.T) {
-	data, err := NetworkSnapshot("01f20aa2-2e76-4d76-a4c0-c502b8934fc7", UserId, SessionId, PrivateKey)
+	data, err := NetworkSnapshot("c95108e9-81e7-4119-93bd-1674ed121bbf", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -120,7 +122,7 @@ func TestExternalTransactions(t *testing.T) {
 }
 
 func TestSearchUser(t *testing.T) {
-	data, err := MixinRequest("GET", "/search/"+"37194514", nil, UserId, SessionId, PrivateKey)
+	data, err := MixinRequest("GET", "/search/37066011", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }
@@ -131,9 +133,27 @@ func TestReadUser(t *testing.T) {
 	fmt.Println("data:", string(data))
 }
 
+func TestReadProfile(t *testing.T) {
+	data, err := MixinRequest("GET", "/me", nil, UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	fmt.Println("data:", string(data))
+}
+
+func TestUpdateProfile(t *testing.T) {
+	params := P{
+		"redirect_uri": "http://www.igroup.pub/auth",
+	}
+	data, err := MixinRequest("POST", "/me", params, UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	fmt.Println("data:", string(data))
+}
+
 func TestCreateAppUser(t *testing.T) {
 	user, err := CreateAppUser("no one", "123456", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
+
+	v0, _ := prettyjson.Marshal(user)
+	log.Println(string(v0))
 
 	info, err := user.ReadProfile()
 	assert.Nil(t, err)
