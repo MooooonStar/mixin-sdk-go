@@ -9,7 +9,6 @@ func NetworkSnapshots(asset string, offset time.Time, order string, limit int, u
 		"asset":  asset,
 		"order":  order,
 	}
-
 	return MixinRequest("GET", "/network/snapshots", params, usedId, sessionId, privateKey)
 }
 
