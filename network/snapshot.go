@@ -31,3 +31,12 @@ func ExternalTransactions(assetID, publicOrName, emptyOrTag string, offset time.
 
 	return MixinRequest("GET", "/external/transactions", params, usedId, sessionId, privateKey)
 }
+func MyNetworkSnapshots(asset string, offset time.Time, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+	params := P{
+		"limit":  limit,
+		"offset": offset.UTC().Format(time.RFC3339Nano),
+		"asset":  asset,
+	}
+
+	return MixinRequest("GET", "/snapshots", params, usedId, sessionId, privateKey)
+}
