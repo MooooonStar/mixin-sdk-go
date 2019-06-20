@@ -1,14 +1,21 @@
 package network
 
-import "time"
+import (
+	"time"
+)
 
-func NetworkSnapshots(asset string, offset time.Time, order string, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+func NetworkSnapshots(asset string, offset time.Time, asc bool, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+	order := "DESC"
+	if asc {
+		order = "ASC"
+	}
 	params := P{
 		"limit":  limit,
 		"offset": offset.UTC().Format(time.RFC3339Nano),
 		"asset":  asset,
 		"order":  order,
 	}
+
 	return MixinRequest("GET", "/network/snapshots", params, usedId, sessionId, privateKey)
 }
 
@@ -30,4 +37,13 @@ func ExternalTransactions(assetID, publicOrName, emptyOrTag string, offset time.
 	}
 
 	return MixinRequest("GET", "/external/transactions", params, usedId, sessionId, privateKey)
+}
+func MyNetworkSnapshots(asset string, offset time.Time, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
+	params := P{
+		"limit":  limit,
+		"offset": offset.UTC().Format(time.RFC3339Nano),
+		"asset":  asset,
+	}
+
+	return MixinRequest("GET", "/snapshots", params, usedId, sessionId, privateKey)
 }
