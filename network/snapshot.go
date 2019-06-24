@@ -1,6 +1,8 @@
 package network
 
-import "time"
+import (
+	"time"
+)
 
 func NetworkSnapshots(asset string, offset time.Time, order string, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
 	params := P{
@@ -9,11 +11,11 @@ func NetworkSnapshots(asset string, offset time.Time, order string, limit int, u
 		"asset":  asset,
 		"order":  order,
 	}
-	return MixinRequest("GET", "/network/snapshots", params, usedId, sessionId, privateKey)
+	return Request("GET", "/network/snapshots"+BuildQuery(params), nil, usedId, sessionId, privateKey)
 }
 
 func NetworkSnapshot(snapshotID string, usedId, sessionId, privateKey string) ([]byte, error) {
-	return MixinRequest("GET", "/network/snapshots/"+snapshotID, nil, usedId, sessionId, privateKey)
+	return Request("GET", "/network/snapshots/"+snapshotID, nil, usedId, sessionId, privateKey)
 }
 
 func ExternalTransactions(assetID, publicOrName, emptyOrTag string, offset time.Time, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
@@ -29,7 +31,7 @@ func ExternalTransactions(assetID, publicOrName, emptyOrTag string, offset time.
 		params["account_tag"] = emptyOrTag
 	}
 
-	return MixinRequest("GET", "/external/transactions", params, usedId, sessionId, privateKey)
+	return Request("GET", "/external/transactions"+BuildQuery(params), nil, usedId, sessionId, privateKey)
 }
 func MyNetworkSnapshots(asset string, offset time.Time, limit int, usedId, sessionId, privateKey string) ([]byte, error) {
 	params := P{
@@ -38,5 +40,5 @@ func MyNetworkSnapshots(asset string, offset time.Time, limit int, usedId, sessi
 		"asset":  asset,
 	}
 
-	return MixinRequest("GET", "/snapshots", params, usedId, sessionId, privateKey)
+	return Request("GET", "/snapshots"+BuildQuery(params), nil, usedId, sessionId, privateKey)
 }

@@ -20,8 +20,20 @@ func (u *User) Request(method, uri string, body []byte) ([]byte, error) {
 	return Request(method, uri, body, u.UserId, u.SessionId, u.PrivateKey)
 }
 
-func (u User) ReadProfile() ([]byte, error) {
+func (u *User) ReadProfile() ([]byte, error) {
 	return Request("GET", "/me", nil, u.UserId, u.SessionId, u.PrivateKey)
+}
+
+func (u *User) UpdateProfile(fullname, avatarBase64 string) ([]byte, error) {
+	params := make(P)
+	if fullname != "" {
+		params["full_name"] = fullname
+	}
+	if avatarBase64 != "" {
+		params["avatar_base64"] = avatarBase64
+	}
+	bt, _ := json.Marshal(params)
+	return Request("POST", "/me", bt, u.UserId, u.SessionId, u.PrivateKey)
 }
 
 func (u User) CreatePIN(oldPin, newPin string) ([]byte, error) {

@@ -5,58 +5,23 @@ import (
 	"encoding/json"
 )
 
-// User messenger user entity
-type User struct {
-	UserId         string `json:"user_id"`
-	IdentityNumber string `json:"identity_number"`
-	FullName       string `json:"full_name,omitempty"`
-	AvatarURL      string `json:"avatar_url,omitempty"`
-	CreatedAt      string `json:"created_at,omitempty"`
-	Phone          string `json:"phone,omitempty"`
+func (m Messenger) ReadProfile(ctx context.Context) ([]byte, error) {
+	return m.Request("GET", "/me", nil)
 }
 
-// FetchProfile fetch my profile
-func (m Messenger) FetchProfile(ctx context.Context) (*User, error) {
-	data, err := m.Request("GET", "/me", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		User User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return &resp.User, err
-}
-
-// ModifyProfile update my profile
-func (m Messenger) ModifyProfile(ctx context.Context, fullname, avatarBase64 string) (*User, error) {
-	paras := map[string]interface{}{}
+func (m Messenger) UpdateProfile(ctx context.Context, fullname, avatarBase64 string) ([]byte, error) {
+	paras := make(map[string]interface{})
 	if len(fullname) > 0 {
 		paras["full_name"] = fullname
 	}
 	if len(avatarBase64) > 0 {
 		paras["avatar_base64"] = avatarBase64
 	}
-	payload, err := json.Marshal(paras)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := m.Request("POST", "/me", payload)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		User User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return &resp.User, err
+	bt, _ := json.Marshal(paras)
+	return m.Request("POST", "/me", bt)
 }
 
-// ModifyPreference update my preference
-func (m Messenger) ModifyPreference(ctx context.Context, receiveMessageSource, acceptConversationSource string) (*User, error) {
+func (m Messenger) UpdatePreference(ctx context.Context, receiveMessageSource, acceptConversationSource string) ([]byte, error) {
 	paras := map[string]interface{}{}
 	if len(receiveMessageSource) > 0 {
 		paras["receive_message_source"] = receiveMessageSource
@@ -64,84 +29,25 @@ func (m Messenger) ModifyPreference(ctx context.Context, receiveMessageSource, a
 	if len(acceptConversationSource) > 0 {
 		paras["accept_conversation_source"] = acceptConversationSource
 	}
-	payload, err := json.Marshal(paras)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := m.Request("POST", "/me/preferences", payload)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		User User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return &resp.User, err
+	bt, _ := json.Marshal(paras)
+	return m.Request("POST", "/me/preferences", bt)
 }
 
-// FetchUsers fetch users
-func (m Messenger) FetchUsers(ctx context.Context, userIDS ...string) ([]User, error) {
-	if len(userIDS) == 0 {
-		return nil, nil
-	}
-
-	payload, err := json.Marshal(userIDS)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := m.Request("POST", "/users/fetch", payload)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Users []User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return resp.Users, nil
+func (m Messenger) FetchUsers(ctx context.Context, userIDs ...string) ([]byte, error) {
+	bt, _ := json.Marshal(userIDs)
+	return m.Request("POST", "/users/fetch", bt)
 }
 
-// FetchUser fetch user
-func (m Messenger) FetchUser(ctx context.Context, userID string) (*User, error) {
-	data, err := m.Request("GET", "/users/"+userID, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		User User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return &resp.User, err
+func (m Messenger) FetchUser(ctx context.Context, userID string) ([]byte, error) {
+	return m.Request("GET", "/users/"+userID, nil)
 }
 
 // SearchUser search user; q is String: Mixin Id or Phone Numbe
-func (m Messenger) SearchUser(ctx context.Context, q string) (*User, error) {
-	data, err := m.Request("GET", "/search/"+q, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		User User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return &resp.User, err
+func (m Messenger) SearchUser(ctx context.Context, q string) ([]byte, error) {
+	return m.Request("GET", "/search/"+q, nil)
 }
 
 // FetchFriends fetch friends
-func (m Messenger) FetchFriends(ctx context.Context) ([]User, error) {
-	data, err := m.Request("GET", "/friends", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp struct {
-		Users []User `json:"data"`
-	}
-	err = json.Unmarshal(data, &resp)
-	return resp.Users, err
+func (m Messenger) FetchFriends(ctx context.Context) ([]byte, error) {
+	return m.Request("GET", "/friends", nil)
 }

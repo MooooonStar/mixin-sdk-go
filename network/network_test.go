@@ -16,7 +16,9 @@ var snowCNBAddr = "0x4fE05eBB326f52A671247d693a56771e29E1b5EA"
 
 func TestVerifyPin(t *testing.T) {
 	data, err := VerifyPIN(PinCode, PinToken, UserId, SessionId, PrivateKey)
-	assert.Nil(t, err)
+	if err != nil {
+		t.Error(err)
+	}
 	log.Println(string(data))
 }
 
@@ -129,28 +131,19 @@ func TestExternalTransactions(t *testing.T) {
 }
 
 func TestSearchUser(t *testing.T) {
-	data, err := MixinRequest("GET", "/search/37194514", nil, UserId, SessionId, PrivateKey)
+	data, err := Request("GET", "/search/37194514", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }
 
 func TestReadUser(t *testing.T) {
-	data, err := MixinRequest("GET", "/users/"+"14521f6b-2619-41ba-89ff-d440330cbde0", nil, UserId, SessionId, PrivateKey)
+	data, err := Request("GET", "/users/"+"14521f6b-2619-41ba-89ff-d440330cbde0", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }
 
 func TestReadProfile(t *testing.T) {
-	data, err := MixinRequest("GET", "/me", nil, UserId, SessionId, PrivateKey)
-	assert.Nil(t, err)
-	fmt.Println("data:", string(data))
-}
-
-func TestUpdateProfile(t *testing.T) {
-	params := P{
-		"redirect_uri": "http://www.igroup.pub/auth",
-	}
-	data, err := MixinRequest("POST", "/me", params, UserId, SessionId, PrivateKey)
+	data, err := Request("GET", "/me", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }

@@ -8,26 +8,28 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 type P map[string]interface{}
 
 var httpClient = &http.Client{Timeout: time.Duration(10 * time.Second)}
 
-func Request(method, uri string, body []byte, userId, sessionId, privateKey string) ([]byte, error) {
-	token, err := SignAuthenticationToken(userId, sessionId, privateKey, method, uri, string(body))
-	if err != nil {
-		return nil, err
+func BuildQuery(params P) string {
+	str := make([]string, 0)
+	for k, v := range params {
+		str = append(str, fmt.Sprintf("%v=%v", k, v))
 	}
+	query := "?" + strings.Join(str, "&")
+	return query
+}
 
+func RequestWithToken(method, uri string, body []byte, accessToken string) ([]byte, error) {
 	req, err := http.NewRequest(method, "https://api.mixin.one"+uri, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -48,26 +50,11 @@ func Request(method, uri string, body []byte, userId, sessionId, privateKey stri
 	return bt, err
 }
 
-func MixinRequest(method, uri string, params P, userId, sessionId, privateKey string) ([]byte, error) {
-	if params == nil {
-		return Request(method, uri, nil, userId, sessionId, privateKey)
+func Request(method, uri string, body []byte, userId, sessionId, privateKey string) ([]byte, error) {
+	token, err := SignAuthenticationToken(userId, sessionId, privateKey, method, uri, string(body))
+	if err != nil {
+		return nil, err
 	}
 
-	switch method {
-	case "GET", "DELETE":
-		str := make([]string, 0)
-		for k, v := range params {
-			str = append(str, fmt.Sprintf("%v=%v", k, v))
-		}
-		query := "?" + strings.Join(str, "&")
-		return Request(method, uri+query, nil, userId, sessionId, privateKey)
-
-	case "POST":
-		body, err := jsoniter.Marshal(params)
-		if err != nil {
-			return nil, err
-		}
-		return Request(method, uri, body, userId, sessionId, privateKey)
-	}
-	return nil, fmt.Errorf("Unsupported method.")
+	return RequestWithToken(method, uri, body, token)
 }

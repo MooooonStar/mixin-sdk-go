@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	m                          *Messenger
-	ctx                        context.Context
+	m                    *Messenger
+	ctx                  context.Context
 	conversationId, snow string
 )
 
@@ -119,7 +119,7 @@ func TestSendFile(t *testing.T) {
 }
 
 func TestSendPlainData(t *testing.T) {
-	file, err := os.Open("123.mp4")
+	file, err := os.Open("sample.mp4")
 	if err != nil {
 		t.Error(err)
 	}
