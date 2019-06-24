@@ -42,7 +42,7 @@ func TestReadAddresses(t *testing.T) {
 }
 
 func TestReadAsset(t *testing.T) {
-	data, err := ReadAsset(BTC, UserId, SessionId, PrivateKey)
+	data, err := ReadAsset(EOS, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -108,6 +108,13 @@ func TestNetworkSnapshots(t *testing.T) {
 	log.Println(string(v))
 }
 
+func TestMyNetworkSnapshots(t *testing.T) {
+	data, err := MyNetworkSnapshots("", time.Now(), 10, UserId, SessionId, PrivateKey)
+	assert.Nil(t, err)
+	v, _ := prettyjson.Format(data)
+	log.Println(string(v))
+}
+
 func TestNetworkSnapshot(t *testing.T) {
 	data, err := NetworkSnapshot("c95108e9-81e7-4119-93bd-1674ed121bbf", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
@@ -122,7 +129,7 @@ func TestExternalTransactions(t *testing.T) {
 }
 
 func TestSearchUser(t *testing.T) {
-	data, err := MixinRequest("GET", "/search/37066011", nil, UserId, SessionId, PrivateKey)
+	data, err := MixinRequest("GET", "/search/37194514", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }

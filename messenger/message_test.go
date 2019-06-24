@@ -11,16 +11,21 @@ import (
 var (
 	m                          *Messenger
 	ctx                        context.Context
-	conversationId, snow, soon string
+	conversationId, snow string
 )
 
 func init() {
 	m = NewMessenger(UserId, SessionId, PrivateKey)
 	ctx = context.Background()
 	go m.Run(ctx, DefaultBlazeListener)
+	//replace with your own mixin messenger wallet id, which can get from network.TestSearchUser
 	snow = "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
-	soon = snow
-	conversationId = UniqueConversationId(m.UserId, snow)
+
+	conversation, err := m.CreateConversation(ctx, CategoryContact, Participant{UserID: snow})
+	if err != nil {
+		panic(err)
+	}
+	conversationId = conversation.ID
 }
 
 func TestSendText(t *testing.T) {
@@ -138,7 +143,7 @@ func TestSendPlainData(t *testing.T) {
 }
 
 func TestSendGroupMessage(t *testing.T) {
-	err := m.SendGroupMessage(ctx, "hello world", snow, soon)
+	err := m.SendGroupMessage(ctx, "hello world", snow, snow)
 	if err != nil {
 		panic(err)
 	}

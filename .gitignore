@@ -20,6 +20,6 @@ messenger/*.png
 network/example/example
 messenger/example/example
 
-network/config.*
+network/config.*.go
 messenger/config.*.go
 messenger/example/config.local.go
