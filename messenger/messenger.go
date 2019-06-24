@@ -7,18 +7,18 @@ import (
 	"log"
 	"time"
 
-	mixin "github.com/MooooonStar/mixin-sdk-go/network"
+	"github.com/MooooonStar/mixin-sdk-go/network"
 )
 
 // Messenger mixin messenger
 type Messenger struct {
-	*mixin.User
+	*network.User
 	*BlazeClient
 }
 
 // NewMessenger create messenger
 func NewMessenger(userId, sessionId, privateKey string) *Messenger {
-	user := mixin.NewUser(userId, sessionId, privateKey)
+	user := network.NewUser(userId, sessionId, privateKey)
 	client := NewBlazeClient(userId, sessionId, privateKey)
 	return &Messenger{user, client}
 }

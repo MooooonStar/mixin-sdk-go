@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	mixin "github.com/MooooonStar/mixin-sdk-go/network"
+	"github.com/MooooonStar/mixin-sdk-go/network"
 	"github.com/gorilla/websocket"
 	uuid "github.com/satori/go.uuid"
 )
@@ -37,7 +37,7 @@ type BlazeMessage struct {
 	Action string                 `json:"action"`
 	Params map[string]interface{} `json:"params,omitempty"`
 	Data   interface{}            `json:"data,omitempty"`
-	Error  *mixin.Error           `json:"error,omitempty"`
+	Error  *network.Error         `json:"error,omitempty"`
 }
 
 type MessageView struct {
@@ -123,7 +123,7 @@ func (b *BlazeClient) Loop(ctx context.Context, listener BlazeListener) error {
 }
 
 func connectMixinBlaze(uid, sid, key string) (*websocket.Conn, error) {
-	token, err := mixin.SignAuthenticationToken(uid, sid, key, "GET", "/", "")
+	token, err := network.SignAuthenticationToken(uid, sid, key, "GET", "/", "")
 	if err != nil {
 		return nil, err
 	}
