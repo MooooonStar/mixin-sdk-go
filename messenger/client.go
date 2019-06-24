@@ -23,6 +23,15 @@ const (
 	pingPeriod      = (pongWait * 9) / 10
 )
 
+const (
+	MessageCategoryPlainText             = "PLAIN_TEXT"
+	MessageCategoryPlainImage            = "PLAIN_IMAGE"
+	MessageCategoryPlainData             = "PLAIN_DATA"
+	MessageCategoryPlainSticker          = "PLAIN_STICKER"
+	MessageCategorySystemConversation    = "SYSTEM_CONVERSATION"
+	MessageCategorySystemAccountSnapshot = "SYSTEM_ACCOUNT_SNAPSHOT"
+)
+
 type BlazeMessage struct {
 	Id     string                 `json:"id"`
 	Action string                 `json:"action"`
@@ -197,7 +206,7 @@ func writeMessageAndWait(ctx context.Context, mc *messageContext, action string,
 	mc.transactions.set(id, func(t BlazeMessage) error {
 		select {
 		case resp <- t:
-		case <-time.After(2 * time.Second):
+		case <-time.After(1 * time.Second):
 			return fmt.Errorf("timeout to hook %s %s", action, id)
 		}
 		return nil
