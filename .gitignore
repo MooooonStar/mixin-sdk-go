@@ -23,3 +23,6 @@ messenger/example/example
 network/config.*.go
 messenger/config.*.go
 messenger/example/config.local.go
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

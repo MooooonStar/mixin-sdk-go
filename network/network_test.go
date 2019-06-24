@@ -1,12 +1,12 @@
 package network
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"testing"
 	"time"
 
-	prettyjson "github.com/hokaccha/go-prettyjson"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -55,30 +55,22 @@ func TestReadAssets(t *testing.T) {
 	log.Println(string(data))
 }
 
-func TestVerifyPayment(t *testing.T) {
-	data, err := VerifyPayment("825d5134-c921-3cf9-a83b-848b73c9e83b", "10", "CNB", "34fd7fee-6b14-4a24-82e1-6411768b9370", UserId, SessionId, PrivateKey)
-	assert.Nil(t, err)
-	log.Println(string(data))
-}
-
 func TestTransfer(t *testing.T) {
 	trace := uuid.Must(uuid.NewV4()).String()
 	data, err := Transfer("7b3f0a95-3ee9-4c1b-8ae9-170e3877d909", "10", CNB, "test transfer", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	v, _ := prettyjson.Format(data)
-	log.Println(string(v))
+	log.Println(string(data))
 }
 
 func TestWithdraw(t *testing.T) {
 	trace := uuid.Must(uuid.NewV4()).String()
-	//data, err := Withdrawal("5dfe3f1e-7022-4f37-901d-49febaf485bf", "11", "Hello", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
-	data, err := Withdrawal("4ceab4e8-79e9-4be5-8c5d-93e264ec3589", "0.0001", "Hi", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
+	data, err := Withdrawal("8cc45353-ec53-41da-b637-421023816031", "0.01", "Hi", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
 
 func TestReadTransfer(t *testing.T) {
-	data, err := ReadTransfer("6ac2ee21-a9ef-4b52-8774-d4d18a622161", UserId, SessionId, PrivateKey)
+	data, err := ReadTransfer("c8c6b6aa-b839-47c7-a63e-d2655f995ccd", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
@@ -106,15 +98,13 @@ func TestNetworkSnapshots(t *testing.T) {
 	checkpoint, _ := time.Parse(time.RFC3339Nano, "2019-04-08T05:33:41.100000Z")
 	data, err := NetworkSnapshots("", checkpoint, "DESC", 10, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	v, _ := prettyjson.Format(data)
-	log.Println(string(v))
+	log.Println(string(data))
 }
 
 func TestMyNetworkSnapshots(t *testing.T) {
 	data, err := MyNetworkSnapshots("", time.Now(), 10, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
-	v, _ := prettyjson.Format(data)
-	log.Println(string(v))
+	log.Println(string(data))
 }
 
 func TestNetworkSnapshot(t *testing.T) {
@@ -152,8 +142,8 @@ func TestCreateAppUser(t *testing.T) {
 	user, err := CreateAppUser("no one", "123456", UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 
-	v0, _ := prettyjson.Marshal(user)
-	log.Println(string(v0))
+	bt, _ := json.Marshal(user)
+	log.Println(string(bt))
 
 	info, err := user.ReadProfile()
 	assert.Nil(t, err)

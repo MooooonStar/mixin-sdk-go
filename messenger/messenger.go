@@ -43,7 +43,7 @@ func (l defaultBlazeListener) OnMessage(ctx context.Context, msg MessageView, us
 	if err != nil {
 		return err
 	}
-	if msg.Category == "SYSTEM_ACCOUNT_SNAPSHOT" {
+	if msg.Category == MessageCategorySystemAccountSnapshot {
 		var transfer TransferView
 		if err := json.Unmarshal(data, &transfer); err != nil {
 			return err
