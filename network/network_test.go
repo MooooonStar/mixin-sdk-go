@@ -56,14 +56,14 @@ func TestReadAssets(t *testing.T) {
 }
 
 func TestTransfer(t *testing.T) {
-	trace := uuid.Must(uuid.NewV4()).String()
+	trace := uuid.NewV4().String()
 	data, err := Transfer("7b3f0a95-3ee9-4c1b-8ae9-170e3877d909", "10", CNB, "test transfer", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
 }
 
 func TestWithdraw(t *testing.T) {
-	trace := uuid.Must(uuid.NewV4()).String()
+	trace := uuid.NewV4().String()
 	data, err := Withdrawal("8cc45353-ec53-41da-b637-421023816031", "0.01", "Hi", trace, PinCode, PinToken, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	log.Println(string(data))
@@ -121,7 +121,7 @@ func TestExternalTransactions(t *testing.T) {
 }
 
 func TestSearchUser(t *testing.T) {
-	data, err := Request("GET", "/search/37194514", nil, UserId, SessionId, PrivateKey)
+	data, err := Request("GET", "/search/1092365", nil, UserId, SessionId, PrivateKey)
 	assert.Nil(t, err)
 	fmt.Println("data:", string(data))
 }

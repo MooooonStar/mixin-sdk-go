@@ -41,6 +41,7 @@ func main() {
 
 	// //your mixin user id, can get from  "Search User"
 	snow := "7b3f0a95-3ee9-4c1b-8ae9-170e3877d909"
+	//snow := "f214be3c-c00e-4e6b-b5d2-9085c9a66c6f"
 
 	//must create conversation first. If have created before, skip this step.
 	conversation, err := m.CreateConversation(ctx, messenger.CategoryContact,

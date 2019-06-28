@@ -1,3 +1,5 @@
+github.com/MooooonStar/mixin-sdk-go/network v0.0.0-20190624123822-074cffa1ceab h1:KbltLKEdI/h9we5sBJv84Ch46TGcRWxLuy+v6bEyzcI=
+github.com/MooooonStar/mixin-sdk-go/network v0.0.0-20190624123822-074cffa1ceab/go.mod h1:TMz8WlsPHewPOtE14uro1299GN9oXidcg1nxLckR39M=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=

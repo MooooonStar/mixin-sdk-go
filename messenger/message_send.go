@@ -42,11 +42,12 @@ type AppCard struct {
 }
 
 type PlainMessage struct {
-	ConversationID string `json:"conversation_id"`
-	RecipentID     string `json:"recipient_id"`
-	MessageID      string `json:"message_id"`
-	Category       string `json:"category"`
-	Data           string `json:"data"`
+	ConversationID   string `json:"conversation_id"`
+	RecipentID       string `json:"recipient_id"`
+	RepresentativeId string `json:"representative_id"`
+	MessageID        string `json:"message_id"`
+	Category         string `json:"category"`
+	Data             string `json:"data"`
 }
 
 // send a text messeage to recipientId
@@ -196,11 +197,12 @@ func (b *Messenger) SendGroupMessage(ctx context.Context, content string, recipi
 	messages := make([]PlainMessage, 0)
 	for _, recipient := range recipientId {
 		message := PlainMessage{
-			ConversationID: UniqueConversationId(b.UserId, recipient),
-			RecipentID:     recipient,
-			MessageID:      UuidNewV4().String(),
-			Category:       "PLAIN_TEXT",
-			Data:           base64.StdEncoding.EncodeToString([]byte(content)),
+			ConversationID:   UniqueConversationId(b.UserId, recipient),
+			RecipentID:       recipient,
+			MessageID:        UuidNewV4().String(),
+			RepresentativeId: "a3075614-21fc-48c9-808a-397235b6d02b",
+			Category:         "PLAIN_TEXT",
+			Data:             base64.StdEncoding.EncodeToString([]byte(content)),
 		}
 		messages = append(messages, message)
 	}
